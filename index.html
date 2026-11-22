@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<!--
+  Algoritmo FLS — Osteoporosis
+  © 2026 Álvaro Curiel García. Todos los derechos reservados.
+  Queda prohibida la copia, modificación o redistribución total o parcial sin autorización expresa del autor.
+  Ver archivo LICENSE.
+-->
+<html lang="es">
+<head>
+<meta name="author" content="Álvaro Curiel García">
+<meta name="copyright" content="© 2026 Álvaro Curiel García. Todos los derechos reservados.">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLS · Algoritmo Terapéutico Osteoporosis</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0C1B36;--navy2:#1a3660;--teal:#0a7f7f;--teal2:#e0f5f5;--red:#b91c1c;--red2:#fef2f2;--orange:#c2570f;--orange2:#fff7ed;--amber2:#fffbeb;--green:#166534;--green2:#f0fdf4;--purple:#6d28d9;--blue:#1d4ed8;--blue2:#eff6ff;--g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;--g300:#cbd5e1;--g500:#64748b;--g700:#334155;--text:#1e293b;--shadow:0 1px 8px rgba(12,27,54,.10);--r:10px;--rs:6px;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.rpill,.svc-opt,.cbox-item,.btn,summary{-webkit-tap-highlight-color:rgba(10,127,127,.15);touch-action:manipulation}
+@media(max-width:560px){input[type=number],input.num{font-size:16px}}
+.foot{max-width:940px;margin:0 auto;padding:0 16px 28px;text-align:center;font-size:11.5px;color:var(--g500);line-height:1.6}
+.foot strong{color:var(--g700)}
+.boot-msg{background:#fff;border-radius:10px;padding:18px 22px;box-shadow:0 1px 8px rgba(12,27,54,.10);font-size:14px;line-height:1.55}
+.js-err{background:#fef2f2;border-left:3px solid #b91c1c;padding:12px 15px;border-radius:6px;font-size:13px;margin-bottom:12px;word-break:break-word}
+body{font-family:'DM Sans',sans-serif;background:var(--g100);color:var(--text);min-height:100vh;font-size:14.5px;line-height:1.6}
+.hdr{background:var(--navy);color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.28)}
+.hdr-in{max-width:940px;margin:0 auto;padding:13px 22px;display:flex;align-items:center;gap:14px}
+.hdr-ico{width:40px;height:40px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hdr-txt h1{font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;line-height:1.2}
+.hdr-txt p{font-size:11.5px;color:rgba(255,255,255,.6);margin-top:1px}
+.hdr-badge{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);padding:4px 12px;border-radius:100px;font-size:11px;font-weight:500;white-space:nowrap}
+.main{max-width:940px;margin:0 auto;padding:20px 16px 80px}
+.prog-box{background:#fff;border-radius:var(--r);padding:16px 22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.prog-steps{display:flex;align-items:center}
+.prog-step{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
+.prog-step:not(:last-child)::after{content:'';flex:1;height:2px;background:var(--g200);margin:0 6px;min-width:8px}
+.prog-step.done:not(:last-child)::after,.prog-step.active:not(:last-child)::after{background:var(--teal)}
+.snum{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid var(--g200);background:#fff;color:var(--g300)}
+.prog-step.active .snum,.prog-step.done .snum{background:var(--teal);border-color:var(--teal);color:#fff}
+.slbl{font-size:11px;font-weight:500;color:var(--g300);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prog-step.active .slbl,.prog-step.done .slbl{color:var(--teal)}
+@media(max-width:560px){.slbl{display:none}.prog-step:not(:last-child)::after{min-width:4px}}
+.card{background:#fff;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.card-hdr{background:var(--navy);color:#fff;padding:15px 22px}
+.card-hdr h2{font-family:'Libre Baskerville',serif;font-size:16px;font-weight:700}
+.card-hdr p{font-size:12.5px;color:rgba(255,255,255,.6);margin-top:2px}
+.card-hdr.teal{background:var(--teal)}.card-hdr.orange{background:var(--orange)}
+.card-body{padding:22px}.card-body.pt0{padding-top:14px}
+.sec-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g500);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--g200)}
+.fgrp{margin-bottom:18px}.fgrp:last-child{margin-bottom:0}
+.flbl{display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:7px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.frow{grid-template-columns:1fr}}
+input[type=number],input.num{width:100%;padding:9px 13px;border:1.5px solid var(--g200);border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);background:#fff;outline:none}
+input[type=number]:focus,input.num:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(10,127,127,.1)}
+.fhint{font-size:11.5px;color:var(--g500);margin-top:3px}
+.rpills{display:flex;flex-wrap:wrap;gap:7px}
+.rpill{display:inline-flex;align-items:center;padding:7px 15px;border:2px solid var(--g200);border-radius:100px;cursor:pointer;font-size:13px;font-weight:500;color:var(--g500);user-select:none}
+.rpill:hover{border-color:var(--teal);color:var(--teal)}.rpill.sel{background:var(--teal);border-color:var(--teal);color:#fff}
+.rpill input{display:none}
+.cbox-list{display:flex;flex-direction:column;gap:7px}
+.cbox-item{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--rs);cursor:pointer}
+.cbox-item:hover{border-color:var(--teal);background:var(--teal2)}.cbox-item.chk{border-color:var(--teal);background:var(--teal2)}
+.cbox-item.chk-warn{border-color:#d97706!important;background:var(--amber2)!important}
+.cbox-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--teal);flex-shrink:0;margin-top:2px;cursor:pointer}
+.cbox-item label,.cbox-item .cbox-lbl{font-size:13px;cursor:pointer;color:var(--text);line-height:1.4}
+.cbox-item input[type=checkbox]{pointer-events:none}
+/* Service selector (paso 3) */
+.svc-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.svc-opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;background:var(--g50);border:2px solid var(--g200);border-radius:var(--rs);cursor:pointer;transition:all .15s}
+.svc-opt:hover{border-color:var(--teal);background:var(--teal2)}
+.svc-opt.sel{border-color:var(--teal);background:var(--teal2);box-shadow:0 0 0 3px rgba(10,127,127,.12)}
+.svc-opt .svc-radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--g300);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center}
+.svc-opt.sel .svc-radio{border-color:var(--teal)}
+.svc-opt.sel .svc-radio::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--teal)}
+.svc-opt .svc-txt{flex:1}
+.svc-opt .svc-title{font-size:14.5px;font-weight:700;color:var(--navy)}
+.svc-opt .svc-sub{font-size:12px;color:var(--g500);margin-top:2px;line-height:1.4}
+/* Reference dropdown (details/summary) */
+.ref-dd{border:1px solid var(--g200);border-radius:var(--rs);margin-bottom:12px;background:#fff;overflow:hidden}
+.ref-dd>summary{list-style:none;cursor:pointer;padding:11px 15px;font-size:12.5px;font-weight:600;color:var(--g700);display:flex;align-items:center;gap:8px;user-select:none;background:var(--g50)}
+.ref-dd>summary::-webkit-details-marker{display:none}
+.ref-dd>summary::before{content:'▸';font-size:11px;color:var(--g500);transition:transform .15s}
+.ref-dd[open]>summary::before{transform:rotate(90deg)}
+.ref-dd .ref-body{padding:10px 16px 14px 16px;font-size:12.5px;color:var(--text);line-height:1.6}
+.ref-body .ref-grp{font-weight:700;color:var(--g700);margin:8px 0 3px 0;font-size:12px}
+.ref-body ul{margin:0 0 4px 0;padding-left:20px}
+.ref-body li{margin-bottom:3px}
+/* CI dropdown */
+.ci-details{border-radius:var(--r);overflow:hidden}
+.ci-summary{list-style:none;cursor:pointer;padding:18px 22px;background:linear-gradient(135deg,#c2570f,#9a4410);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px;user-select:none}
+.ci-summary::-webkit-details-marker{display:none}
+.ci-sum-icon{margin-right:8px}
+.ci-sum-sub{font-size:12px;opacity:.8;font-weight:400;margin-top:3px}
+.ci-sum-arrow{font-size:16px;transition:transform .18s;flex-shrink:0}
+.ci-details[open] .ci-sum-arrow{transform:rotate(90deg)}
+.cbox-item label small,.cbox-item .cbox-lbl small{display:block;display:block;color:var(--g500);font-size:11.5px;margin-top:1px}
+.cbox-item label small.warn,.cbox-item .cbox-lbl small.warn{color:var(--orange)}
+.alert{padding:11px 15px;border-radius:var(--rs);font-size:13px;margin-bottom:10px;display:flex;gap:10px;line-height:1.5}
+.alert-ico{flex-shrink:0;font-size:15px;margin-top:1px}
+.alert-info{background:var(--blue2);border-left:3px solid var(--blue)}.alert-warn{background:var(--amber2);border-left:3px solid #d97706}
+.alert-danger{background:var(--red2);border-left:3px solid var(--red)}.alert-ok{background:var(--green2);border-left:3px solid #16a34a}
+.alert-teal{background:var(--teal2);border-left:3px solid var(--teal)}
+.nav-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 0;gap:10px}
+.btn{padding:11px 26px;border-radius:var(--rs);font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:7px}
+.btn-pri{background:var(--teal);color:#fff}.btn-pri:hover{background:#0a6a6a}
+.btn-sec{background:var(--g100);color:var(--g500)}.btn-sec:hover{background:var(--g200)}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{background:var(--navy2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.div{border:none;border-top:1px solid var(--g200);margin:16px 0}
+.rbadge{display:inline-flex;align-items:center;gap:6px;padding:5px 16px;border-radius:100px;font-size:13px;font-weight:700;text-transform:uppercase}
+.rb-ma{background:var(--red);color:#fff}.rb-a{background:#c2570f;color:#fff}.rb-m{background:#b45309;color:#fff}
+.rb-b{background:#166534;color:#fff}.rb-uce{background:var(--purple);color:#fff}
+.rb-reu{background:var(--blue);color:#fff}.rb-reh{background:var(--teal);color:#fff}
+.tcard{border:1.5px solid var(--g200);border-radius:var(--rs);overflow:hidden;margin-bottom:10px}
+.tcard-hdr{display:flex;align-items:center;gap:10px;padding:10px 15px;background:var(--g50);border-bottom:1px solid var(--g200)}
+.tcard-hdr.pri1{border-left:3px solid var(--teal)}.tcard-hdr.pri2{border-left:3px solid var(--navy)}
+.tcard-hdr.alt{border-left:3px solid #d97706}.tcard-hdr.ci{border-left:3px solid var(--red);background:var(--red2)}
+.pnum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.pn1{background:var(--teal);color:#fff}.pn2{background:var(--navy);color:#fff}.pna{background:#d97706;color:#fff}.pnr{background:var(--red);color:#fff}
+.tname{font-weight:700;font-size:14px;color:var(--text)}.tsub{font-size:12px;color:var(--g500);margin-left:2px}
+.ttag{margin-left:auto;font-size:10.5px;padding:2px 8px;border-radius:100px;background:var(--g200);color:var(--g700);white-space:nowrap;flex-shrink:0}
+.ttag.green{background:#dcfce7;color:#15803d}.ttag.orange{background:#ffedd5;color:#9a3412}
+.ttag.blue{background:#dbeafe;color:#1e40af}.ttag.red{background:var(--red2);color:var(--red)}
+.tcard-body{padding:11px 15px}
+.tdose{font-size:13.5px;color:var(--text);margin-bottom:5px}.tdose strong{color:var(--navy)}
+.tnote{font-size:12px;color:var(--g500);line-height:1.5;margin-bottom:3px}
+.tref{font-size:11px;color:var(--teal);font-style:italic;margin-top:4px}
+.tseq{font-size:12px;color:var(--orange);background:var(--orange2);padding:5px 10px;border-radius:4px;margin-top:7px}
+.tci{font-size:12px;color:var(--red);background:var(--red2);padding:5px 10px;border-radius:4px;margin-top:5px;border-left:3px solid var(--red)}
+.twarn{font-size:12px;color:var(--orange);background:var(--orange2);padding:5px 10px;border-radius:4px;margin-top:5px;border-left:3px solid #d97706}
+.warn-item{display:flex;gap:9px;padding:8px 12px;border-radius:var(--rs);font-size:12.5px;margin-bottom:6px;align-items:flex-start;line-height:1.5}
+.wi-d{background:var(--red2);border:1px solid #fca5a5}.wi-w{background:var(--amber2);border:1px solid #fcd34d}
+.wi-i{background:var(--blue2);border:1px solid #93c5fd}.wi-ok{background:var(--green2);border:1px solid #86efac}
+.warn-ico{flex-shrink:0;font-size:14px}
+.tl{position:relative;padding-left:22px}
+.tl::before{content:'';position:absolute;left:6px;top:4px;bottom:4px;width:2px;background:var(--g200)}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-item::before{content:'';position:absolute;left:-22px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--teal);border:2px solid #fff;box-shadow:0 0 0 2px var(--teal)}
+.tl-time{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);margin-bottom:1px}
+.tl-text{font-size:13px;color:var(--g700);line-height:1.5}
+.opt-card{border:2px solid var(--g200);border-radius:var(--r);padding:16px 18px;margin-bottom:10px;position:relative}
+.opt-card.rec{border-color:var(--teal);background:linear-gradient(135deg,var(--teal2),#fff)}
+.opt-rec-badge{position:absolute;top:-10px;right:16px;background:var(--teal);color:#fff;padding:2px 12px;border-radius:100px;font-size:10.5px;font-weight:700;text-transform:uppercase}
+.opt-title{font-weight:700;font-size:14px;color:var(--navy);margin-bottom:6px}
+.opt-pros{font-size:12.5px;color:var(--green);margin-top:6px}.opt-cons{font-size:12.5px;color:var(--orange);margin-top:2px}
+.ci-box{background:var(--red2);border:1.5px solid #fca5a5;border-radius:var(--rs);padding:12px 15px;margin-bottom:8px}
+.ci-box-title{font-size:12.5px;font-weight:700;color:var(--red);margin-bottom:4px}
+.ci-box ul{padding-left:16px}.ci-box li{font-size:12.5px;color:var(--red);margin-bottom:2px}
+details{border:1.5px solid var(--g200);border-radius:var(--rs);margin-top:4px}
+summary{padding:10px 15px;cursor:pointer;font-size:13px;font-weight:600;color:var(--g700);user-select:none;list-style:none;display:flex;align-items:center;gap:7px}
+summary::-webkit-details-marker{display:none}
+details[open] summary{border-bottom:1px solid var(--g200)}
+.ref-body{padding:10px 15px}
+.ref-item{font-size:12px;color:var(--g500);padding:4px 0;border-bottom:1px dotted var(--g200);line-height:1.5}
+.ref-item:last-child{border-bottom:none}.ref-n{font-weight:700;color:var(--teal);margin-right:5px}
+.res-sec{font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:var(--navy);margin-bottom:12px;padding-bottom:5px;border-bottom:2px solid var(--teal)}
+@media print{.hdr,.prog-box,.nav-bar,.btn-print-row{display:none!important}.card{box-shadow:none;border:1px solid #ddd}body{background:#fff}.main{padding:0}}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-in">
+    <div class="hdr-ico">🦴</div>
+    <div class="hdr-txt"><h1>Algoritmo FLS — Osteoporosis</h1><p>Servicio de Rehabilitación · Fracture Liaison Service</p></div>
+    <span class="hdr-badge">SEIOMM 2022</span>
+  </div>
+</header>
+<main class="main">
+  <div class="prog-box" id="progBox"></div>
+  <div id="stepContent"><div class="boot-msg"><strong>Cargando el algoritmo…</strong><br><br>Si este mensaje no desaparece, el visor no está ejecutando JavaScript. Ocurre con la <em>vista previa</em> de la app Archivos, WhatsApp, Mail o AirDrop en iPhone, que muestran el HTML pero no lo ejecutan. Abre el archivo desde una dirección web en Safari o Chrome.<noscript><br><br><strong style="color:#b91c1c">JavaScript está desactivado en este navegador.</strong></noscript></div></div>
+  <div class="nav-bar" id="navBar"></div>
+</main>
+<footer class="foot">
+  <strong>Algoritmo FLS — Osteoporosis</strong> · Desarrollado por <strong>Álvaro Curiel García</strong><br>
+  Servicio de Medicina Física y Rehabilitación · Hospital Universitario Doctor Peset (Valencia)<br>
+  © 2026 Álvaro Curiel García. Todos los derechos reservados. Herramienta de apoyo a la decisión clínica; no sustituye el juicio del facultativo.
+</footer>
+<script>
+/* Muestra en pantalla cualquier error de JavaScript (útil en iPhone, donde no hay consola) */
+window.onerror=function(msg,src,line,col){try{var b=document.getElementById('stepContent');if(b){var d=document.createElement('div');d.className='js-err';d.textContent='Error de JavaScript: '+String(msg).replace(/\.$/,'')+(line?' (línea '+line+(col?':'+col:'')+')':'')+'. Envía una captura de este mensaje.';b.insertBefore(d,b.firstChild);}}catch(e){}return false;};
+</script>
+<script>
+/* ── STATE ── */
+const S={
+  edad:null,sexo:null,menopausica:null,edad_meno:null,
+  fx_actual:null,fx_previa:null,fx_vert_previas:0,fx_cadera_previa:false,escenario:null,
+  // Derivación: selección directa del servicio ('uce' | 'reuma' | 'ninguno' | null)
+  deriv_manual:null,
+  // Analítica hospitalizado
+  vitd_h:null,pth_h:null,fge_h:null,calcio_bajo_h:false,
+  // Calcio corregido hospitalizado: modo 'directo' (ca_corr_h) o 'calcular' (ca_total_h + alb_h)
+  ca_modo_h:'directo',ca_corr_h:null,ca_total_h:null,alb_h:null,
+  // Analítica ambulatorio
+  vitd_a:null,pth_a:null,fge_a:null,calcio_bajo_a:false,
+  ca_modo_a:'directo',ca_corr_a:null,ca_total_a:null,alb_a:null,
+  fa_elev:false,tsh_alt:false,p1np:null,ctx:null,
+  // DXA
+  dmo_col:null,dmo_cuello:null,dmo_cadera:null,
+  // ─── CONTRAINDICACIONES (Fichas Técnicas) ───
+  // Vía oral
+  via_oral_ok:null,gi_esofago:false,gi_ulcera:false,gi_malabs_activa:false,
+  // Anabólicos comunes
+  neo_bone_risk:false,    // neoplasia esquelética o metástasis óseas → CI teriparatida, abaloparatida, romosozumab
+  rt_esqueletica:false,   // radioterapia esqueleto previa → CI teriparatida, abaloparatida (riesgo osteosarcoma)
+  hipercalcemia:false,    // hipercalcemia preexistente → CI teriparatida, abaloparatida
+  fa_muy_elev:false,      // FA muy elevada sin causa → CI teriparatida y abaloparatida; descartar Paget
+  paget_hpt:false,        // Paget / HPT (no osteoporosis primaria) → CI teriparatida específica (FT)
+  insuf_renal_severa:false,// IRC grave → CI teriparatida y abaloparatida
+  insuf_hepatica:false,
+  // Romosozumab — CI específicas FT (Evenity)
+  iam_ictus_previo:false, // ANTECEDENTES de IAM o ictus (cualquier momento) → CI ABSOLUTA romosozumab [FT Evenity 4.3]
+  cv_riesgo:false,        // RCV elevado (precaución, no CI absoluta) [FT Evenity 4.4]
+  // Denosumab — precaución adicional (hipocalcemia ya cubierta)
+  // Zoledrónico — FGe <35 y hipocalcemia ya cubiertos
+  // SERMs
+  tev:false,
+  // Abaloparatida adicional
+  cardiopatia_abalo:false, // cardiopatía significativa → precaución abaloparatida (hipotensión ortostática/taquicardia)
+  urolitiasis:false,       // urolitiasis activa → precaución teriparatida/abaloparatida
+  // Posología SC
+  posologia_sc_ok:null,
+  // Factores que condicionan preferencia SC/IV sobre oral en riesgo ALTO
+  edad_75_mas:false,      // edad ≥80 → preferir SC/IV (mejor adherencia, menor riesgo GI)
+  polimedicado:false,     // ≥5 fármacos crónicos
+  mala_adherencia:false,  // adherencia oral previamente mala o esperada baja
+  // Varón
+  deprivacion_androg:false,
+  factor_riesgo_mayor:false, // glucocorticoides, inhibidores aromatasa, hipogonadismo u otro FR mayor (para estratificación)
+};
+let cur=0;
+/* Compatibilidad iOS/Safari: lectura de números con coma o punto, sin operador ?? */
+function nz(v){return (v===null||v===undefined)?'':v;}
+function numES(v){if(v===null||v===undefined)return null;v=String(v).replace(/\s/g,'').replace(',','.');if(v===''||v==='-'||v==='.')return null;var n=parseFloat(v);return isNaN(n)?null:n;}
+function intES(v){var n=numES(v);return n===null?null:Math.round(n);}
+function scrollTop0(){try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){window.scrollTo(0,0);}}
+const $=id=>document.getElementById(id);
+function pill(id,opts,cur2,cb){
+  return opts.map(o=>`<label class="rpill ${String(cur2)===String(o.v)?'sel':''}" onclick="S['${id}']=${typeof o.v==='number'?o.v:`'${o.v}'`};refreshPills();${cb||''}"><input type="radio" name="${id}" value="${o.v}">${o.l}</label>`).join('');
+}
+function cboxItem(key,label,sub,warn){
+  const wc=warn?'chk-warn':'chk';
+  return `<div class="cbox-item ${S[key]?wc:''}" id="ci_${key}" onclick="toggleCbox('${key}','${wc}')">
+    <input type="checkbox" id="cb_${key}" tabindex="-1" aria-hidden="true" ${S[key]?'checked':''}>
+    <span class="cbox-lbl">${label}${sub?`<small class="${warn?'warn':''}">${sub}</small>`:''}</span>
+  </div>`;
+}
+function toggleCbox(key,wc){S[key]=!S[key];const el=$('ci_'+key);if(el){el.className='cbox-item'+(S[key]?' '+wc:'');}const cb=$('cb_'+key);if(cb)cb.checked=S[key];}
+function refreshPills(){document.querySelectorAll('.rpill').forEach(p=>{const i=p.querySelector('input');if(i)p.classList.toggle('sel',String(S[i.name])===String(i.value));});}
+function setBool(key,val,el){S[key]=val;el.parentElement.querySelectorAll('.rpill').forEach(p=>p.classList.remove('sel'));el.classList.add('sel');}
+function setCaModo(sufijo,modo){S['ca_modo_'+sufijo]=modo;renderCurrentStep();}
+/* Widget de calcio corregido: selector de modo (directo / calcular) + campos + resultado en vivo */
+function calcioWidget(sufijo){
+  const modo=S['ca_modo_'+sufijo];
+  const cc=calcioCorregido(sufijo);
+  let resultado='';
+  if(cc!==null){
+    const bajo=cc<8.5, alto=cc>10.5;
+    const col=bajo?'var(--red)':alto?'var(--orange)':'var(--green)';
+    const etq=bajo?'Hipocalcemia':alto?'Elevado':'Normal';
+    resultado=`<div style="margin-top:8px;padding:8px 12px;border-radius:var(--rs);background:var(--g50);border:1px solid var(--g200);font-size:13px">
+      Calcio corregido: <strong style="color:${col}">${cc} mg/dL</strong> <span style="color:${col}">· ${etq}</span></div>`;
+  }
+  return `<div class="fgrp">
+    <label class="flbl">Calcemia corregida</label>
+    <div class="rpills" style="margin-bottom:10px">
+      <label class="rpill ${modo==='directo'?'sel':''}" onclick="setCaModo('${sufijo}','directo')"><input type="radio">Introducir directamente</label>
+      <label class="rpill ${modo==='calcular'?'sel':''}" onclick="setCaModo('${sufijo}','calcular')"><input type="radio">Calcular desde albúmina</label>
+    </div>
+    ${modo==='directo'
+      ? `<input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="4" max="16" placeholder="Ca corregido (mg/dL)" value="${nz(S['ca_corr_'+sufijo])}" oninput="S.ca_corr_${sufijo}=numES(this.value);renderResultLive('${sufijo}')">
+         <div class="fhint">Hipocalcemia si &lt;8,5 mg/dL · Hipercalcemia si &gt;10,5 mg/dL</div>`
+      : `<div class="frow">
+           <div><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="4" max="16" placeholder="Calcio total (mg/dL)" value="${nz(S['ca_total_'+sufijo])}" oninput="S.ca_total_${sufijo}=numES(this.value);renderResultLive('${sufijo}')"></div>
+           <div><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="1" max="6" placeholder="Albúmina (g/dL)" value="${nz(S['alb_'+sufijo])}" oninput="S.alb_${sufijo}=numES(this.value);renderResultLive('${sufijo}')"></div>
+         </div>
+         <div class="fhint">Fórmula: Ca corregido = Ca total + 0,8 × (4,0 − albúmina)</div>`
+    }
+    <div id="ca_result_${sufijo}">${resultado}</div>
+  </div>`;
+}
+/* Actualiza solo el resultado del calcio sin re-renderizar todo el paso (evita perder foco) */
+function renderResultLive(sufijo){
+  const el=document.getElementById('ca_result_'+sufijo);
+  if(!el)return;
+  const cc=calcioCorregido(sufijo);
+  if(cc===null){el.innerHTML='';return;}
+  const bajo=cc<8.5, alto=cc>10.5;
+  const col=bajo?'var(--red)':alto?'var(--orange)':'var(--green)';
+  const etq=bajo?'Hipocalcemia':alto?'Elevado':'Normal';
+  el.innerHTML=`<div style="margin-top:8px;padding:8px 12px;border-radius:var(--rs);background:var(--g50);border:1px solid var(--g200);font-size:13px">Calcio corregido: <strong style="color:${col}">${cc} mg/dL</strong> <span style="color:${col}">· ${etq}</span></div>`;
+}
+function menopausiaPrecoz(){return S.sexo==='mujer'&&S.menopausica==='si'&&S.edad_meno&&S.edad_meno<45;}
+function isMujerFertil(){return S.sexo==='mujer'&&S.menopausica!=='si';}
+/* Fármacos con indicación aprobada en varón en España (AEMPS): denosumab, risedronato, zoledronato, teriparatida. El resto es uso off-label. */
+const APROBADOS_VARON=['denosumab','risedronato','zoledronato','teriparatida'];
+function offLabelVaron(farmaco){return S.sexo==='varon'&&!APROBADOS_VARON.includes(farmaco);}
+const OFFLABEL_TAG='<em style="color:var(--orange)">[uso off-label en varón en España]</em>';
+
+/* ── DERIVATION ── */
+function computeDerivation(){
+  const age90=S.edad>=90;
+  // Edad ≥90 en hospitalizado sugiere UCE automáticamente si no se ha elegido otra cosa
+  if(S.deriv_manual==='uce'){
+    const r=age90?['Incluye edad ≥90 años']:[];
+    return{svc:'UCE',reasons:r,manual:true};
+  }
+  if(S.deriv_manual==='reuma'){
+    return{svc:'REUMATOLOGIA',reasons:[],manual:true};
+  }
+  if(S.deriv_manual==='ninguno'){
+    return{svc:'REHABILITACION',reasons:[],manual:true};
+  }
+  // Sin selección manual: sugerencia automática por edad ≥90 (solo hospitalizado)
+  if(S.escenario!=='ambulatorio'&&age90){
+    return{svc:'UCE',reasons:['Edad ≥90 años'],manual:false};
+  }
+  return{svc:'REHABILITACION',reasons:[],manual:false};
+}
+
+/* ── RISK (Fig.1 SEIOMM 2022) ── */
+function computeRisk(){
+  const scores=[S.dmo_col,S.dmo_cuello,S.dmo_cadera].filter(v=>v!==null&&v!==''&&!isNaN(v));
+  const hasDXA=scores.length>0;
+  const mn=hasDXA?Math.min(...scores):null;
+  const fx=S.fx_actual;
+  // Any fragility fracture (current index fracture)
+  const hasFx=['cadera','vertebral','humero','radio','pelvis','otras'].includes(fx);
+  // Total vertebral fractures = previas + actual si es vertebral
+  const prevVert=parseInt(S.fx_vert_previas)||0;
+  const totalVert=prevVert+(fx==='vertebral'?1:0);
+  // Has any vertebral or hip fracture (current OR previous)
+  const hasVertFx=fx==='vertebral'||prevVert>=1;
+  const hasHipFx=fx==='cadera'||S.fx_cadera_previa;
+  const hasVertOrHip=hasVertFx||hasHipFx;
+
+  // ── MUY ALTO (Fig.1 SEIOMM 2022) — criterios que NO dependen de DXA ──
+  // ≥2 fracturas vertebrales (total: previas + actual)
+  if(totalVert>=2)return'MUY_ALTO';
+
+  // ── MUY ALTO — criterios que dependen de DXA ──
+  if(hasDXA){
+    // 1 fractura vertebral o de cadera + DMO <-3,0 T
+    if(hasVertOrHip&&mn<-3.0)return'MUY_ALTO';
+    // DMO ≤-3,5 T (cualquier localización)
+    if(mn<=-3.5)return'MUY_ALTO';
+  }
+
+  // ── ALTO (Fig.1 SEIOMM 2022) ──
+  // Fractura por fragilidad (cualquier localización que no cumpla MUY ALTO)
+  if(hasFx)return'ALTO';
+
+  // A partir de aquí se requiere DXA para seguir estratificando
+  if(!hasDXA)return null;
+
+  // DMO ≤-2,5 T
+  if(mn<=-2.5)return'ALTO';
+  // DMO osteopénica + factores de riesgo mayores (*) [nota pie Fig.1: "sobre todo si T ≤-2"]
+  const majRF=menopausiaPrecoz()||S.deprivacion_androg||S.factor_riesgo_mayor;
+  if(mn<=-2.0&&majRF)return'ALTO';
+
+  // ── MODERADO — perfil SERM (Fig.1 SEIOMM 2022) ──
+  // DMO columna <-2,5T + CF >-2,0T + sin fracturas + edad <65a + mujer posmenopáusica
+  if(S.dmo_col!==null&&S.dmo_cuello!==null&&S.dmo_col<-2.5&&S.dmo_cuello>-2.0
+    &&!hasFx&&S.edad<65&&S.sexo==='mujer'&&S.menopausica==='si')return'MODERADO_SERM';
+
+  if(mn<-1.0)return'MODERADO';
+  return'BAJO';
+}
+
+/* ── CONTRAINDICATION CHECKS (per FT) ── */
+function ciTeriparatida(){
+  const ci=[];
+  if(S.neo_bone_risk)ci.push('Neoplasias malignas esqueléticas o metástasis óseas [FT 4.3]');
+  if(S.rt_esqueletica)ci.push('Radioterapia externa previa sobre el esqueleto [FT 4.3]');
+  if(S.hipercalcemia||hipercalcemiaCorr())ci.push('Hipercalcemia preexistente'+(hipercalcemiaCorr()?' (Ca corregido >10,5 mg/dL)':'')+' [FT 4.3]');
+  if(S.fa_muy_elev)ci.push('Elevaciones inexplicadas de fosfatasa alcalina [FT 4.3]');
+  if(S.paget_hpt)ci.push('Enfermedad de Paget o HPT (enf. metabólica ósea distinta a OP primaria) [FT 4.3]');
+  if(S.insuf_renal_severa||(getFGE()!==null&&getFGE()<30))ci.push('Insuficiencia renal grave [FT 4.3]');
+  return ci;
+}
+function ciAbaloparatida(){
+  const ci=[];
+  if(S.neo_bone_risk)ci.push('Neoplasias malignas esqueléticas o metástasis óseas [FT 4.3]');
+  if(S.rt_esqueletica)ci.push('Radioterapia externa previa sobre el esqueleto [FT 4.3]');
+  if(S.hipercalcemia||hipercalcemiaCorr())ci.push('Hipercalcemia preexistente'+(hipercalcemiaCorr()?' (Ca corregido >10,5 mg/dL)':'')+' [FT 4.3]');
+  if(S.fa_muy_elev)ci.push('Elevaciones sin causa aparente de fosfatasa alcalina [FT 4.3]');
+  if(S.insuf_renal_severa||(getFGE()!==null&&getFGE()<30))ci.push('Insuficiencia renal grave [FT 4.3]');
+  if(isMujerFertil())ci.push('Mujeres en edad fértil [FT 4.3] — solo en mujeres posmenopáusicas');
+  return ci;
+}
+function ciRomosozumab(){
+  const ci=[];
+  if(S.iam_ictus_previo)ci.push('Antecedentes de IAM o accidente cerebrovascular — contraindicación absoluta [FT Evenity 4.3]');
+  if(S.hipercalcemia)ci.push('Hipocalcemia/hipercalcemia [FT Evenity 4.3]');
+  if(S.neo_bone_risk)ci.push('Neoplasia con riesgo de metástasis óseas — precaución [FT Evenity 4.4]');
+  return ci;
+}
+function warnRomosozumab(){
+  const w=[];
+  if(S.cv_riesgo&&!S.iam_ictus_previo)w.push('Riesgo cardiovascular elevado: valorar individualmente beneficio/riesgo. Solo si el médico y la paciente acuerdan que el beneficio justifica el riesgo [FT Evenity 4.4]');
+  return w;
+}
+function warnAbaloparatida(){
+  const w=[];
+  if(S.cardiopatia_abalo)w.push('Cardiopatía significativa: abaloparatida puede causar hipotensión ortostática y taquicardia transitoria (primeras 4h). Evaluar TA, estado cardiaco y ECG antes de iniciar; primera(s) dosis bajo supervisión [FT Eladynos 4.4]');
+  if(S.urolitiasis)w.push('Urolitiasis activa o reciente: valorar excreción urinaria de calcio; riesgo de exacerbación [FT Eladynos 4.4]');
+  return w;
+}
+function warnTeriparatida(){
+  const w=[];
+  if(S.urolitiasis)w.push('Urolitiasis activa o reciente: usar con precaución por riesgo potencial de empeoramiento [FT 4.4]');
+  if(getFGE()!==null&&getFGE()>=30&&getFGE()<60)w.push('Insuficiencia renal moderada: usar con precaución [FT 4.4]');
+  return w;
+}
+function ciDenosumab(){
+  const ci=[];
+  if(hipocalcemia())ci.push('Hipocalcemia (Ca corregido <8,5 mg/dL): corregir ANTES de iniciar denosumab [FT Prolia 4.3]');
+  return ci;
+}
+function ciBPOral(){
+  const ci=[];
+  if(S.via_oral_ok==='no')ci.push('Imposibilidad vía oral o de permanecer incorporado 30-60 min');
+  if(S.gi_esofago)ci.push('Patología esofágica grave (estenosis, acalasia, esofagitis) [FT 4.3]');
+  if(S.gi_ulcera)ci.push('Úlcera péptica activa o gastritis severa');
+  if(S.gi_malabs_activa)ci.push('Malabsorción activa — absorción impredecible');
+  return ci;
+}
+function ciBPIV(){
+  const ci=[];const fge=getFGE();const vd=getVitD();
+  if(S.insuf_renal_severa&&(fge===null||fge>=35))ci.push('Insuficiencia renal grave marcada — zoledrónico IV contraindicado [FT 4.3]');
+  if(fge!==null&&fge<35)ci.push(`FGe ${fge} mL/min < 35 — contraindicado [FT 4.3]`);
+  if(vd!==null&&vd<20)ci.push('Déficit VitD — corregir ANTES (riesgo hipocalcemia grave post-infusión)');
+  if(hipocalcemia())ci.push('Hipocalcemia preexistente (Ca corregido <8,5 mg/dL) [FT 4.3]');
+  return ci;
+}
+/* Decide if SC/IV preferred over oral (high risk) */
+function preferSCoverOral(){
+  return (S.edad&&S.edad>=80)||(S.escenario==='hospitalizado'?false:S.edad_75_mas)||S.polimedicado||S.mala_adherencia;
+}
+function getVitD(){return S.escenario==='hospitalizado'?S.vitd_h:S.vitd_a;}
+function getFGE(){return S.escenario==='hospitalizado'?S.fge_h:S.fge_a;}
+function getPTHElev(){return S.escenario==='hospitalizado'?S.pth_h==='elevada':S.pth_a==='elevada';}
+/* Calcio corregido por albúmina. Devuelve valor en mg/dL o null.
+   Fórmula: Ca corregido = Ca total + 0,8 × (4,0 − albúmina) */
+function calcioCorregido(sufijo){
+  const modo=S['ca_modo_'+sufijo];
+  if(modo==='directo'){
+    const v=S['ca_corr_'+sufijo];
+    return (v===null||v===''||isNaN(v))?null:parseFloat(v);
+  }
+  // modo calcular
+  const ct=S['ca_total_'+sufijo], alb=S['alb_'+sufijo];
+  if(ct===null||ct===''||isNaN(ct)||alb===null||alb===''||isNaN(alb))return null;
+  return parseFloat((parseFloat(ct)+0.8*(4.0-parseFloat(alb))).toFixed(2));
+}
+function getCalcioCorr(){return calcioCorregido(S.escenario==='hospitalizado'?'h':'a');}
+/* Hipocalcemia si el calcio corregido es <8,5 mg/dL */
+function hipocalcemia(){const c=getCalcioCorr();return c!==null&&c<8.5;}
+/* Hipercalcemia si el calcio corregido es >10,5 mg/dL */
+function hipercalcemiaCorr(){const c=getCalcioCorr();return c!==null&&c>10.5;}
+/* Insuficiencia renal: casilla marcada O FGe numérico bajo. Umbral <30 = todos los BP contraindicados → denosumab */
+function renalSevera(){return S.insuf_renal_severa||(getFGE()!==null&&getFGE()<30);}
+/* Zoledrónico IV está contraindicado a FGe <35 [FT] o si se marca IR grave */
+function noZoledronico(){return S.insuf_renal_severa||(getFGE()!==null&&getFGE()<35);}
+
+/* ── VIT D HTML ── */
+function vitdHtml(){
+  const vd=getVitD();if(vd===null)return'';const pth=getPTHElev();let h='';
+  if(vd<15){
+    h+=`<div class="warn-item wi-d"><span class="warn-ico">⏱️</span><div><strong>Déficit grave de vitamina D (${vd} ng/mL).</strong><br><br>
+      <strong style="color:var(--red)">Se recomienda demorar unas 6-8 semanas el inicio del antiosteoporótico (antirresortivo o anabólico) respecto al inicio de la reposición de vitamina D</strong>, para minimizar el riesgo de hipocalcemia y asegurar la eficacia del fármaco.<br><br>
+      El fármaco puede prescribirse ya durante el ingreso, programando su inicio de forma diferida a las 6-8 semanas del comienzo de la vitamina D. De este modo se evita una nueva visita solo para pautarlo.<br>`;
+    if(pth){h+=`<strong style="color:var(--red)">⛔ PTH elevada (HPT secundario activo): la corrección previa es aún más prioritaria, especialmente antes de cualquier bifosfonato IV.</strong>`;}
+    h+=`</div></div>`;
+  }else if(vd<20){
+    h+=`<div class="warn-item wi-d"><span class="warn-ico">🚨</span><div><strong>Déficit VitD (${vd} ng/mL).</strong> Carga: colecalciferol 50.000 UI/sem × 8 sem → mantenimiento 800-2.000 UI/día. Alt: calcifediol 0,266 mg/15-30 días (hepatopatía/malabsorción).<br>`;
+    if(pth){h+=`<strong style="color:var(--red)">⛔ PTH elevada (HPT secundario): corregir VitD ANTES de cualquier bifosfonato. NO zoledrónico IV hasta corrección. Riesgo hipocalcemia grave [FT zoledrónico 4.4].</strong>`;}
+    else{h+=`PTH normal: puede iniciarse BP <strong>oral</strong> simultáneamente. <strong>NO zoledrónico IV hasta corregir déficit [FT zoledrónico 4.4].</strong>`;}
+    h+=`</div></div>`;
+  }else if(vd<30){h+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div><strong>Insuficiencia VitD (${vd} ng/mL).</strong> Mantenimiento 1.000-2.000 UI/día. Puede iniciarse tratamiento sin esperar.</div></div>`;}
+  else{h+=`<div class="warn-item wi-ok"><span class="warn-ico">✅</span><div>VitD suficiente (${vd} ng/mL). Mantenimiento 800-1.200 UI/día.</div></div>`;}
+  h+=`<div class="warn-item wi-i"><span class="warn-ico">ℹ️</span><div>Calcio 1.000-1.200 mg/día totales (dieta + suplemento, solo el déficit). Proteínas 1,0-1,5 g/kg/día.</div></div>`;
+  return h;
+}
+
+/* ── BP PREFERENCE LOGIC ── */
+function bpPreference(){
+  const fge=getFGE();const vd=getVitD();const vitdBad=vd!==null&&vd<20;
+  const ciBPO=ciBPOral();const fgeLow=renalSevera();const zoloCI=noZoledronico();
+  if(fgeLow)return{first:'deno',noOral:true,noIV:true};
+  if(ciBPO.length>0&&!vitdBad&&!zoloCI)return{first:'iv',noOral:true,noIV:false,ciOralList:ciBPO};
+  if(ciBPO.length>0)return{first:'deno',noOral:true,noIV:true,ciOralList:ciBPO};
+  return{first:'oral',noOral:false,noIV:vitdBad||zoloCI,vitdBad:vitdBad};
+}
+
+/* ── CARD BUILDERS ── */
+function tc(priClass,pnClass,pn,name,sub,tag,tagClass,dose,noteArr,ref,seq,ciList,warnList){
+  const notes=Array.isArray(noteArr)?noteArr:[noteArr].filter(Boolean);
+  return`<div class="tcard"><div class="tcard-hdr ${priClass}"><span class="pnum ${pnClass}">${pn}</span><span class="tname">${name}</span><span class="tsub">${sub}</span><span class="ttag ${tagClass}">${tag}</span></div><div class="tcard-body"><div class="tdose">${dose}</div>${notes.map(n=>`<div class="tnote">⚠️ ${n}</div>`).join('')}${ciList&&ciList.length?`<div class="tci">⛔ CI detectadas (FT):<br>• ${ciList.join('<br>• ')}</div>`:''}${warnList&&warnList.length?`<div class="twarn">⚠️ Precauciones:<br>• ${warnList.join('<br>• ')}</div>`:''}${ref?`<div class="tref">${ref}</div>`:''}${seq?`<div class="tseq">➡️ ${seq}</div>`:''}
+  </div></div>`;
+}
+function tcCI(name,sub,reasons){
+  return`<div class="tcard"><div class="tcard-hdr ci"><span class="pnum pnr">⛔</span><span class="tname">${name}</span><span class="tsub">${sub}</span><span class="ttag red">CONTRAINDICADO</span></div><div class="tcard-body"><div class="tci">• ${reasons.join('<br>• ')}</div></div></div>`;
+}
+
+/* ── HOSPITALIZED RECOMMENDATION ── */
+function hospRecHtml(){
+  const vd=S.vitd_h;const pthElev=S.pth_h==='elevada';
+  // Muy alto riesgo clínico sin DMO derivado de las fracturas capturadas en el paso 2
+  const prevVert=parseInt(S.fx_vert_previas)||0;
+  const totalVert=prevVert+(S.fx_actual==='vertebral'?1:0);
+  const hasHipFx=S.fx_actual==='cadera'||S.fx_cadera_previa;
+  const mhFactors=[];
+  if(totalVert>=2)mhFactors.push('≥2 fracturas vertebrales (previas + actual)');
+  else if(totalVert>=1&&hasHipFx)mhFactors.push('Fractura vertebral + fractura de cadera');
+  else if(hasHipFx&&S.fx_cadera_previa&&S.fx_actual==='cadera')mhFactors.push('Fractura de cadera actual + cadera contralateral previa');
+  const isMuyAlto=mhFactors.length>0;const vitdBad=vd!==null&&vd<20;const vitdSevero=vd!==null&&vd<15;
+  const ciTeri=ciTeriparatida();const ciAbalo=ciAbaloparatida();const ciRomo=ciRomosozumab();
+  const ciAnaAll=ciTeri.length>0&&ciAbalo.length>0;
+  const bp=bpPreference();
+  let recOpt='A';
+  if(isMuyAlto&&!ciAnaAll&&S.posologia_sc_ok!=='no')recOpt='C';
+  else if(vitdBad&&pthElev&&!isMuyAlto)recOpt='B';
+  else recOpt='A';
+  if(ciAnaAll&&recOpt==='C')recOpt='A';
+  let bpTextA='';
+  if(bp.first==='deno'){bpTextA=`<strong>Denosumab 60 mg SC/6m</strong> (${renalSevera()?'insuficiencia renal grave: bifosfonatos contraindicados':'bifosfonatos con contraindicación'}, denosumab sin ajuste renal). ⚠️ Planificar BP puente al suspender.`;}
+  else if(bp.first==='iv'&&!bp.noIV){bpTextA=`<strong>Zoledrónico 5 mg IV</strong> (vía oral no posible). Esperar ≥2 sem post-cirugía. FGe mín ≥35 [FT 4.3]. Corregir VitD/calcio antes. [Lyles NEJM 2007]`;}
+  else{bpTextA=`${S.sexo==='varon'?`<strong>Risedronato 35 mg/sem VO</strong> (o 150 mg/mes) <strong>(♂ aprobado)</strong> <span style="color:var(--g500)">— alendronato uso off-label en varón</span>`:`<strong>Alendronato 70 mg/sem VO</strong> <strong>(♀)</strong> o <strong>Risedronato 35 mg/sem VO</strong> (o 150 mg/mes)`}. Formulación gastrorresistente disponible.${vitdBad?` <em style="color:var(--red)">[Zoledrónico IV diferido hasta corrección VitD]</em>`:` Zoledrónico IV queda como alternativa si: >80a, mala adherencia, no candidato a anabólico o necesidad de ciclo anual único.`}`;}
+  let anaText='';
+  if(ciAnaAll){anaText=`<div class="ci-box"><div class="ci-box-title">⛔ Osteoformadores contraindicados en este paciente.</div><ul>${ciTeri.map(c=>`<li>${c}</li>`).join('')}</ul></div>Tratar como alto riesgo: ${bpTextA}`;}
+  else if(S.posologia_sc_ok==='no'){anaText=`<em style="color:var(--orange)">No candidato a posología SC. Si DMO confirma muy alto riesgo: zoledrónico IV o denosumab. Discutir con equipo.</em>`;}
+  else{
+    if(S.sexo==='mujer'){
+      const ciR=ciRomosozumab();const ciA=ciAbaloparatida();const ciT=ciTeriparatida();
+      const wR=warnRomosozumab();const wA=warnAbaloparatida();const wT=warnTeriparatida();
+      const fmtW=arr=>arr.length?` <em style="color:var(--orange)">⚠️ Precaución: ${arr.map(c=>c.split('[')[0]).join('; ')}</em>`:'';
+      let romo='',abalo='',teri='';
+      if(ciR.length===0){romo=`<strong>Romosozumab 210 mg SC/mes × 12m</strong> → zoledrónico IV al finalizar.${fmtW(wR)}`;}else{romo=`<em style="color:var(--red)">Romosozumab CI: ${ciR.map(c=>c.split('[')[0]).join('; ')}</em>`;}
+      if(ciT.length===0){teri=`<strong>Teriparatida 20 μg SC/día × 24m</strong> → antirresortivo al finalizar.${fmtW(wT)}`;}else{teri=`<em style="color:var(--red)">Teriparatida CI: ${ciT.map(c=>c.split('[')[0]).join('; ')}</em>`;}
+      if(ciA.length===0){abalo=`<strong>Abaloparatida 80 μg SC/día × 18m</strong> (Eladynos®, máx 18 meses) → antirresortivo al finalizar.${fmtW(wA)}`;}else{abalo=`<em style="color:var(--red)">Abaloparatida CI: ${ciA.map(c=>c.split('[')[0]).join('; ')}</em>`;}
+      anaText=romo+'<br>'+teri+'<br>'+abalo;
+    }else{
+      const ciT=ciTeriparatida();const wT=warnTeriparatida();
+      const fmtW=arr=>arr.length?` <em style="color:var(--orange)">⚠️ Precaución: ${arr.map(c=>c.split('[')[0]).join('; ')}</em>`:'';
+      if(ciT.length===0){anaText=`<strong>Teriparatida 20 μg SC/día × 24m</strong> → antirresortivo al finalizar.${fmtW(wT)}<br><em style="color:var(--g500)">Romosozumab y abaloparatida: uso off-label en varón en España (solo teriparatida tiene indicación aprobada).</em>`;}
+      else{anaText=`<div class="ci-box"><div class="ci-box-title">⛔ Teriparatida CI:</div><ul>${ciT.map(c=>`<li>${c}</li>`).join('')}</ul></div>Tratar como alto riesgo con antirresortivos.`;}
+    }
+  }
+  let html='';
+  const avisoVitDSevero=(vd!==null&&vd<15)?`<div class="alert alert-danger" style="margin-top:10px"><span class="alert-ico">⏱️</span><div><strong>Déficit grave de VitD (${vd} ng/mL): inicio diferido del antiosteoporótico.</strong> Iniciar durante el ingreso la reposición de vitamina D + calcio, y prescribir el antiosteoporótico con inicio programado a las 6-8 semanas.</div></div>`:'';
+  if(isMuyAlto)html+=`<div class="alert alert-danger"><span class="alert-ico">🔴</span><div><strong>Muy alto riesgo por fracturas:</strong><br>${mhFactors.map(f=>`• ${f}`).join('<br>')}</div></div>`;
+  // Aviso pro-parenteral dentro de la Opción A: paciente pluripatológico (≥80a / polimedicado / mala adherencia)
+  const proParenteralFactores=[(S.edad&&S.edad>=80)||S.edad_75_mas?'edad ≥80 años':'',S.polimedicado?'polimedicación':'',S.mala_adherencia?'adherencia oral dudosa':''].filter(Boolean);
+  let avisoPP='';
+  if(proParenteralFactores.length>0&&bp.first==='oral'){
+    // Para el consejo de vía parenteral solo cuentan CI reales: renal (FGe<35) e hipocalcemia.
+    // El déficit de VitD no contraindica el zoledrónico, solo obliga a diferirlo (igual que el oral).
+    const zoloCI=noZoledronico()||hipocalcemia();
+    const denoCI=ciDenosumab().length>0;
+    const opcionesPP=[];
+    if(!denoCI)opcionesPP.push('<strong>denosumab 60 mg SC/6 meses</strong>');
+    if(!zoloCI)opcionesPP.push('<strong>zoledrónico 5 mg IV/12 meses</strong>');
+    if(opcionesPP.length>0){
+      avisoPP=`<div class="alert alert-teal" style="margin-top:10px"><span class="alert-ico">💡</span><div><strong>Paciente pluripatológico (${proParenteralFactores.join(', ')}):</strong> dentro de la Opción A, valorar iniciar directamente ${opcionesPP.join(' o ')} en lugar del bifosfonato oral. Mejora la adherencia y evita el problema gastrointestinal de la vía oral.${S.posologia_sc_ok==='no'&&!zoloCI?' Como no es candidato a SC, el zoledrónico IV es la opción preferente.':''}</div></div>`;
+    }else{
+      avisoPP=`<div class="alert alert-warn" style="margin-top:10px"><span class="alert-ico">⚠️</span><div><strong>Paciente pluripatológico (${proParenteralFactores.join(', ')}):</strong> aunque se preferiría vía parenteral, tanto denosumab como zoledrónico presentan contraindicaciones en este paciente (ver arriba). Revisar antes de decidir.</div></div>`;
+    }
+  }
+  const opts=[
+    {id:'A',title:'Opción A — BP oral (alendronato ♀ / risedronato ♀♂) ahora + ajuste con DMO al mes',
+     body:`${bpTextA}${avisoPP}<br><br>Al mes (consulta FLS): <strong>DMO ambulatoria + analítica control</strong>. Si DMO confirma muy alto riesgo y candidato: cambiar a osteoformador. Exposición BP oral &lt;3 meses: efecto blunting anabólico mínimo.${avisoVitDSevero}`},
+    {id:'B',title:'Opción B — Solo VitD + calcio durante ingreso, tto definitivo al mes con DMO',
+     body:`Ingreso: <strong>solo calcio + VitD (carga si déficit)</strong>. No iniciar antiosteoporótico.<br>Al mes: DMO + analítica → tratamiento definitivo.<br><em>Indicada si: VitD deficiente + PTH elevada (HPT secundario activo), paciente inestable o analítica incompleta.</em>${avisoVitDSevero}`},
+    {id:'C',title:'Opción C — Osteoformador directo (muy alto riesgo clínico + candidato)',
+     body:`Indicada si: ≥1 factor de muy alto riesgo clínico, sin CI para anabólico y candidato a posología SC.<br><br>${anaText}<br><br>Al mes: DMO ambulatoria. <strong>⚠️ Antirresortivo obligatorio al finalizar el anabólico.</strong>${avisoVitDSevero}`},
+  ];
+  opts.forEach(o=>{
+    const isRec=o.id===recOpt;const disabled=o.id==='C'&&(ciAnaAll||S.posologia_sc_ok==='no');
+    html+=`<div class="opt-card${isRec&&!disabled?' rec':''}"><${isRec&&!disabled?`div class="opt-rec-badge">⭐ Recomendada</div`:`!-- --`}>${disabled?`<div class="opt-rec-badge" style="background:var(--red)">⛔ No viable</div>`:''}<div class="opt-title">${o.title}</div><div style="font-size:13px;color:var(--g700);line-height:1.6;margin-top:6px">${o.body}</div></div>`;
+  });
+  return html;
+}
+
+/* ── AMBULATORY TREATMENT ── */
+function treatmentHtml(risk){
+  const bp=bpPreference();const fgeLow=renalSevera();const zoloCI=noZoledronico();
+  const vitdBad=S.vitd_a!==null&&S.vitd_a<20;const preferSC=preferSCoverOral();
+  const ciTeri=ciTeriparatida();const ciAbalo=ciAbaloparatida();const ciRomo=ciRomosozumab();
+  const wRomo=warnRomosozumab();const ciBPO=ciBPOral();const ciBPI=ciBPIV();
+  const ciAnaAll=ciTeri.length>0&&ciAbalo.length>0;
+  const vitdSevero=S.vitd_a!==null&&S.vitd_a<15;
+  let html='';
+  if(vitdSevero)html+=`<div class="alert alert-danger"><span class="alert-ico">⏱️</span><div><strong>Déficit grave de VitD (${S.vitd_a} ng/mL): inicio diferido del antiosteoporótico.</strong> Prescribir el fármaco seleccionado con inicio programado a las 6-8 semanas del comienzo de la reposición de vitamina D.</div></div>`;
+
+  if(risk==='MUY_ALTO'){
+    html+=`<div class="res-sec">Primera línea — Osteoformador (Anabolic first)</div>`;
+    if(ciAnaAll){html+=`<div class="ci-box"><div class="ci-box-title">⛔ Osteoformadores contraindicados:</div><ul>${ciTeri.map(c=>`<li>${c}</li>`).join('')}</ul></div><div class="alert alert-warn"><span class="alert-ico">⚠️</span><div>Tratar como riesgo ALTO con antirresortivos.</div></div>`;}
+    else if(S.posologia_sc_ok==='no'){html+=`<div class="alert alert-warn"><span class="alert-ico">⚠️</span><div>No candidato a posología SC. Tratar como riesgo ALTO o valorar programa supervisado.</div></div>`;}
+    else{
+      if(S.sexo==='mujer'){
+        if(ciRomo.length===0){html+=tc('pri1','pn1','1ª','Romosozumab','anti-esclerostina (Evenity®)','1ª elección ♀','green','<strong>210 mg SC/mes × 12 meses</strong> (2 inyecciones de 105 mg)',['CI absoluta: antecedentes de IAM o ictus [FT Evenity 4.3]. Hipocalcemia: corregir antes [FT 4.3].'],`[Cosman NEJM 2016; Saag NEJM 2017; SEIOMM 2022]`,'Antirresortivo OBLIGATORIO al finalizar. Zoledrónico IV preferible (mayor ganancia DMO cadera, ARCH). [SEIOMM 2022]',null,wRomo);}
+        else{html+=tcCI('Romosozumab (Evenity®)','anti-esclerostina',ciRomo);}
+      }
+      // Teriparatida
+      if(ciTeri.length===0){
+        const pnT=S.sexo==='mujer'&&ciRomo.length===0?'pn2':'pn1';const prT=S.sexo==='mujer'&&ciRomo.length===0?'pri2':'pri1';const lblT=S.sexo==='mujer'&&ciRomo.length===0?'2ª':'1ª';const tagT=S.sexo==='varon'?'1ª elección ♂':'Alternativa ♀♂';const tagC=S.sexo==='varon'?'green':'blue';
+        html+=tc(prT,pnT,lblT,'Teriparatida','PTH 1-34 (Tetridar®, Forsteo®)',tagT,tagC,'<strong>20 μg SC/día × máx. 24 meses</strong> (solo una vez en la vida)',['CI: neoplasias/mets óseas, RT esqueleto previo, hipercalcemia, FA inexplicada, Paget/HPT, IR grave [FT 4.3]. Primera dosis bajo supervisión (hipotensión ortostática transitoria) [FT 4.4].'],`[Neer NEJM 2001; SEIOMM 2022]`,'Antirresortivo OBLIGATORIO al finalizar. ⚠️ NO iniciar inmediatamente tras denosumab (pérdida transitoria DMO). [SEIOMM 2022]',null,warnTeriparatida());
+      }else{html+=tcCI('Teriparatida','PTH 1-34',ciTeri);}
+      // Abaloparatida (mujer postmenopáusica)
+      if(S.sexo==='mujer'){
+        if(S.menopausica==='si'){
+          if(ciAbalo.length===0){html+=tc('alt','pna','Alt','Abaloparatida','PTHrP 1-34 (Eladynos®)','Solo ♀ posmenopáusica','orange','<strong>80 μg SC/día × 18 meses</strong> (máximo, no exceder)',['No aprobada en varón. CI: hipercalcemia, RT esqueleto, neoplasias/mets óseas, FA inexplicada, IR grave, mujeres en edad fértil [FT 4.3].'],`[Miller JAMA 2016; EMA EPAR 2022]`,'Antirresortivo OBLIGATORIO al finalizar.',null,warnAbaloparatida());}
+          else{html+=tcCI('Abaloparatida (Eladynos®)','PTHrP 1-34',ciAbalo);}
+        }else{html+=`<div class="warn-item wi-i"><span class="warn-ico">ℹ️</span><div>Abaloparatida contraindicada en mujeres en edad fértil [FT Eladynos 4.3].</div></div>`;}
+      }else{html+=`<div class="warn-item wi-i"><span class="warn-ico">ℹ️</span><div>Varón: solo <strong>teriparatida</strong> tiene indicación aprobada en España. Romosozumab y abaloparatida serían uso off-label. [SEIOMM 2022; AEMPS]</div></div>`;}
+    }
+    html+=`<hr class="div"><div class="res-sec">Si anabólico contraindicado o como continuación post-anabólico — Antirresortivos</div>`;
+    if(vitdBad)html+=`<div class="warn-item wi-d"><span class="warn-ico">🚨</span><div>Déficit VitD: <strong>Zoledrónico IV contraindicado hasta corrección.</strong> BP oral puede iniciarse si PTH normal.</div></div>`;
+  }
+
+  if(risk==='MUY_ALTO'||risk==='ALTO'){
+    if(risk==='ALTO'){
+      html+=`<div class="res-sec">Primera línea — Antirresortivos</div>`;
+      if(vitdBad)html+=`<div class="warn-item wi-d"><span class="warn-ico">🚨</span><div>Déficit VitD: <strong>Zoledrónico IV contraindicado hasta corrección [FT 4.4].</strong> BP oral puede iniciarse si PTH normal.</div></div>`;
+    }
+    if(fgeLow){
+      html+=`<div class="warn-item wi-d"><span class="warn-ico">🚨</span><div>${S.fge_a!==null?`FGe ${S.fge_a} mL/min`:'Insuficiencia renal grave'}: bifosfonatos contraindicados (orales e IV) [FT zoledrónico 4.3]. <strong>Denosumab de elección.</strong></div></div>`;
+      html+=tc('pri1','pn1','1ª','Denosumab','anti-RANKL (Prolia®) — de elección ERC grave','IR grave → 1ª elección','green','<strong>60 mg SC/6 meses</strong>. Sin ajuste renal. Puede usarse incluso en diálisis.',['Hipocalcemia: corregir ANTES de iniciar y monitorizar tras cada dosis [FT Prolia 4.3/4.4]. Monitorizar calcemia estrechamente en ERC grave y diálisis (mayor riesgo de hipocalcemia).'],`[Cummings NEJM 2009; SEIOMM 2022]`,'⚠️ NUNCA suspender sin BP puente. En ERC grave valorar cuidadosamente el puente por riesgo de hipocalcemia.');
+    }else if(preferSC&&ciBPO.length===0&&!vitdBad){
+      // Prefer SC/IV over oral when ≥80a or polypharmacy or poor adherence
+      html+=`<div class="alert alert-teal"><span class="alert-ico">ℹ️</span><div>Factores presentes (${[(S.edad&&S.edad>=80)?'≥80 años':'',S.polimedicado?'polimedicado':'',S.mala_adherencia?'adherencia dudosa':''].filter(Boolean).join(', ')}): se recomienda <strong>vía subcutánea o IV antes que oral</strong>. La vía oral se reserva como alternativa si no se dispone o hay rechazo al tratamiento SC. [SEIOMM 2022]</div></div>`;
+      if(!vitdBad&&!zoloCI){
+        html+=tc('pri1','pn1','1ª','Ácido zoledrónico','bifosfonato IV (Zometa®/Aclasta®)',S.fx_actual==='cadera'?'Post-cadera (HORIZON-PFT) ♀♂':'Preferente ≥80a / comorbilidad / polifarmacia','green','<strong>5 mg IV/año</strong> (infusión ≥15 minutos)',['Corregir VitD y calcio ANTES. Hidratación adecuada, especialmente en ancianos. Post-cadera: ≥2 sem post-cirugía. FGe mínimo ≥35 [FT 4.3]. Premedicación con paracetamol (síndrome pseudogripal 24-48h). Monitorizar creatinina.'],`[Lyles NEJM 2007; Black NEJM 2007; SEIOMM 2022]`,'');
+      }else if(zoloCI){
+        html+=tcCI('Ácido zoledrónico IV','bifosfonato IV',[S.fge_a!==null?`FGe ${S.fge_a} < 35 mL/min [FT 4.3]`:'Insuficiencia renal grave marcada [FT 4.3]']);
+      }
+      html+=tc(!vitdBad&&!zoloCI?'pri2':'pri1',!vitdBad&&!zoloCI?'pn2':'pn1',!vitdBad&&!zoloCI?'2ª':'1ª','Denosumab','anti-RANKL (Prolia®)',zoloCI?'IR grave → 1ª elección':'FGe <35 / alternativa IV','orange','<strong>60 mg SC/6 meses</strong>. Sin ajuste renal.',['Hipocalcemia: corregir ANTES [FT Prolia 4.3].','⚠️ NUNCA suspender sin BP puente — riesgo fractura vertebral múltiple por efecto rebote [FT Prolia 4.4].'],`[Cummings NEJM 2009; SEIOMM 2022]`,'');
+      if(!zoloCI){
+        html+=`<hr class="div"><div style="font-size:12.5px;font-weight:600;color:var(--g700);margin-bottom:8px">Alternativa oral si rechazo a SC/IV:</div>`;
+        if(ciBPO.length===0){
+          html+=tc('alt','pna','Alt',S.sexo==='varon'?'Risedronato':'Alendronato o Risedronato','bifosfonato oral','Oral (alternativa en este paciente)','orange',
+            S.sexo==='varon'?'<strong>Risedronato 35 mg/sem VO</strong> o 150 mg/mes <strong>(aprobado en varón)</strong>. <span style="color:var(--g500)">Alendronato: uso off-label en varón en España.</span>':
+            '<strong>Alendronato 70 mg/sem VO</strong> o <strong>Risedronato 35 mg/sem VO</strong> (o 150 mg/mes). Formulación gastrorresistente disponible.',
+            S.sexo==='varon'?'':'Alendronato: tomar en ayunas con agua abundante, no tumbarse 30-60 min.',`[Harris JAMA 1999; SEIOMM 2022]`,'');
+        }
+      }
+    }else{
+      // Standard path: oral first unless CI
+      if(ciBPO.length===0){
+        html+=tc('pri1','pn1','1ª',S.sexo==='varon'?'Risedronato':'Alendronato o Risedronato','bifosfonato oral — 1ª elección',S.sexo==='varon'?'1ª elección ♂ (aprobado)':'1ª elección ♀♂','green',
+          S.sexo==='varon'?'<strong>Risedronato 35 mg/sem VO</strong> o 150 mg/mes. Formulación gastrorresistente disponible. <span style="color:var(--g500)">Alendronato: uso off-label en varón en España.</span>':
+          '<strong>Alendronato 70 mg/sem VO</strong> o <strong>Risedronato 35 mg/sem VO</strong> (o 150 mg/mes). Formulación gastrorresistente disponible.',
+          S.sexo==='varon'?'Aprobados en varón en España: risedronato, zoledronato, denosumab y teriparatida.':'',`[Harris JAMA 1999; Black Lancet 1996; SEIOMM 2022]`,'');
+        if(!vitdBad&&!zoloCI){
+          html+=tc('pri2','pn2','2ª','Ácido zoledrónico','bifosfonato IV',S.fx_actual==='cadera'?'Post-cadera (HORIZON-PFT) ♀♂':'>80a / intolerancia oral / polimedicado / post-cadera','blue','<strong>5 mg IV/año</strong>',['Indicar cuando: >80a, mala adherencia, fractura cadera, polimedicación, o GI oral problemático. Post-cadera: ≥2 sem post-cirugía. FGe mín ≥35. Hidratación previa. Premedicación paracetamol.'],`[Lyles NEJM 2007; SEIOMM 2022]`,'');
+        }else if(zoloCI){
+          html+=tcCI('Ácido zoledrónico IV','bifosfonato IV',[S.fge_a!==null?`FGe ${S.fge_a} < 35 mL/min [FT 4.3]`:'Insuficiencia renal grave marcada [FT 4.3]']);
+        }else{html+=tcCI('Ácido zoledrónico IV','bifosfonato IV',['Déficit VitD: diferir hasta corrección [FT 4.4]']);}
+      }else{
+        html+=tcCI('Alendronato / Risedronato oral','bifosfonato oral',ciBPO);
+        if(!vitdBad&&!zoloCI)html+=tc('pri1','pn1','1ª','Ácido zoledrónico','IV — vía oral no disponible','IV de elección','green','<strong>5 mg IV/año</strong>','FGe mín ≥35. Corregir VitD/calcio antes.',`[SEIOMM 2022]`,'');
+      }
+      if(S.deprivacion_androg&&S.sexo==='varon')html+=tc('alt','pna','Alt','Denosumab','anti-RANKL','Deprivación androgénica ♂','orange','<strong>60 mg SC/6 meses</strong>','⚠️ BP puente obligatorio al suspender.',`[SEIOMM 2022]`,'');
+      html+=tc('alt','pna','Alt','Denosumab','anti-RANKL (Prolia®)',zoloCI?'IR: alternativa a BP':'Alternativa / FGe 30-35','orange','<strong>60 mg SC/6 meses</strong>. Sin ajuste renal.',['⚠️ NUNCA suspender sin BP puente. Si >2,5 años: zoledrónico IV preferible (salvo IR). Hipocalcemia: corregir antes.'],`[Cummings NEJM 2009; SEIOMM 2022]`,'');
+    }
+    if(S.sexo==='mujer'&&S.menopausica==='si'&&S.edad<60&&!S.tev)html+=`<div class="alert alert-teal" style="margin-top:8px"><span class="alert-ico">💊</span><div>Mujer &lt;60a o &lt;10a desde menopausia: THS individualizable. No 1ª línea antiosteoporótica salvo menopausia precoz. [SEIOMM 2022]</div></div>`;
+  }
+
+  if(risk==='MODERADO_SERM'){
+    html+=`<div class="res-sec">Primera línea — SERMs</div>`;
+    html+=`<div class="alert alert-teal"><span class="alert-ico">📋</span><div>Perfil SEIOMM 2022: col &lt;−2,5T + cuello &gt;−2,0T + sin fracturas + &lt;65a. <strong>Solo reducen fractura vertebral.</strong></div></div>`;
+    if(S.tev){html+=tcCI('Raloxifeno / Bazedoxifeno','SERMs',['TEV previo: SERMs contraindicados']);html+=tc('pri1','pn1','1ª','Risedronato (por CI SERM)','bifosfonato oral','CI SERM','green','<strong>35 mg/sem VO</strong>','','[SEIOMM 2022]','');}
+    else{
+      html+=tc('pri1','pn1','1ª','Raloxifeno o Bazedoxifeno','SERM','1ª elección ♀ <65a','green','Raloxifeno <strong>60 mg/día</strong> · Bazedoxifeno <strong>20 mg/día</strong>','Solo fractura vertebral. Hasta 8 años o 65-70a. CI en TEV.',`[Ettinger JAMA 1999; SEIOMM 2022]`,'Al retirar/llegar 65-70a: cambiar a BP o denosumab. [Fig.2 SEIOMM 2022]');
+      html+=tc('alt','pna','Alt','Duavive® (Baze+EC)','TSEC','Con síntomas vasomotores','orange','<strong>20/0,45 mg/día</strong>','CI en TEV.',`[SEIOMM 2022]`,'');
+    }
+    html+=`<hr class="div"><div class="res-sec">2ª elección</div>`;
+    html+=tc('alt','pna','2ª','Ibandronato','bifosfonato oral','Solo vertebral','orange','<strong>150 mg/mes VO</strong>','⚠️ Solo fractura vertebral. Sin eficacia en cadera ni no vertebral. No usar si riesgo predominante de cadera.',`[SEIOMM 2022]`,'');
+    html+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div>Ibandronato y SERMs: nunca si la fractura de entrada o el riesgo predominante es de cadera. [SEIOMM 2022]</div></div>`;
+  }
+  if(risk==='MODERADO'||risk==='BAJO')html+=`<div class="res-sec">Medidas no farmacológicas</div><div class="alert alert-ok"><span class="alert-ico">✅</span><div>Calcio + VitD + ejercicio con carga ≥30 min/día + prevención de caídas. DXA control 2-3 años. Calcular FRAX si osteopenia con FRCV. [SEIOMM 2022]</div></div>`;
+  return html;
+}
+
+function sequentialHtml(risk){
+  if(risk==='MUY_ALTO')return`<div class="tl"><div class="tl-item"><div class="tl-time">Tras teriparatida/abaloparatida</div><div class="tl-text">Antirresortivo <strong>obligatorio e inmediato</strong>. [SEIOMM 2022]</div></div><div class="tl-item"><div class="tl-time">Tras romosozumab (12 meses)</div><div class="tl-text"><strong>Zoledrónico IV preferible</strong> (mayor ganancia DMO cadera, ARCH). [SEIOMM 2022]</div></div><div class="tl-item"><div class="tl-time">⚠️ Denosumab → teriparatida</div><div class="tl-text">NO iniciar teriparatida inmediatamente tras denosumab: pérdida transitoria DMO. Interponer BP primero. [SEIOMM 2022]</div></div></div>`;
+  if(risk==='ALTO')return`<div class="tl"><div class="tl-item"><div class="tl-time">BP orales — 5 años</div><div class="tl-text">Reevaluar: vacación 1-2 años si criterios favorables. [Fig.2 SEIOMM 2022]</div></div><div class="tl-item"><div class="tl-time">Zoledrónico IV — 3 dosis</div><div class="tl-text">Reevaluar vacación. [SEIOMM 2022]</div></div><div class="tl-item"><div class="tl-time">Denosumab — sin vacación</div><div class="tl-text">BP puente obligatorio al suspender (1ª dosis a los 6 meses de la última inyección). Si >2,5 años: zoledrónico IV. Control MRO 3-6 meses. [FT Prolia 4.4; SEIOMM 2022]</div></div></div>`;
+  if(risk==='MODERADO_SERM')return`<div class="tl"><div class="tl-item"><div class="tl-time">SERMs — hasta 8 años o 65-70a</div><div class="tl-text">Al finalizar: cambiar a BP o denosumab según riesgo actualizado. [Fig.2 SEIOMM 2022]</div></div></div>`;
+  return'';
+}
+
+function followupHtml(risk){
+  const items=[];const vd=getVitD();
+  if(vd!==null&&vd<15){
+    items.push(['Inmediato','Iniciar reposición de vitamina D (carga) + calcio. Prescribir el antiosteoporótico con inicio diferido a las 6-8 semanas.']);
+    items.push(['6-8 semanas','Activación del fármaco antirresortivo o anabólico prescrito, una vez avanzada la reposición de vitamina D.']);
+  }else if(vd!==null&&vd<20){items.push(['Inmediato','Inicio de carga de vitamina D y calcio suplementario.']);}
+  if(S.escenario==='hospitalizado')items.push(['1 mes — Consulta FLS','DMO ambulatoria + analítica control (VitD, PTH, calcio, FGe). Inicio o ajuste del tratamiento definitivo. Los marcadores óseos NO se solicitan aún.']);
+  if(risk==='MUY_ALTO'||risk==='ALTO'){
+    items.push(['3-6 meses','Primera solicitud de marcadores de recambio óseo (P1NP + beta-CTX, ayunas 8-10h) para comparar con el basal. Antirresortivos: beta-CTX ↓>50%; osteoformadores: P1NP ↑. Verificar adherencia y tolerancia. [Vasikaran Osteoporos Int 2011]']);
+    items.push(['12 meses','Revisión clínica, tolerancia, analítica (calcio, VitD, FGe, creatinina).']);
+    items.push(['2-3 años','DXA control. Pérdida >LSC → revisar adherencia, causas secundarias, escalar tto.']);
+    if(risk==='MUY_ALTO')items.push(['Fin del anabólico','Antirresortivo INMEDIATO e ininterrumpido.']);
+  }
+  if(risk==='MODERADO_SERM'||risk==='MODERADO'){items.push(['Anual','Revisión clínica y analítica.']);items.push(['2 años','DXA control. Nuevos FRCV o pérdida ósea → escalar tto.']);}
+  if(risk==='BAJO')items.push(['2-3 años','DXA control y reevaluación de riesgo.']);
+  return`<div class="tl">${items.map(i=>`<div class="tl-item"><div class="tl-time">${i[0]}</div><div class="tl-text">${i[1]}</div></div>`).join('')}</div>`;
+}
+
+/* ── Preguntas de vía de administración y preferencia SC/IV (fuera del desplegable de CI) ── */
+function preguntasViaHtml(){
+  return`<div class="card"><div class="card-hdr teal"><h2>💊 Vía de administración</h2></div><div class="card-body">
+    <div class="fgrp"><label class="flbl">¿Puede tomar comprimidos orales y permanecer incorporado 30-60 min?</label><div class="rpills">${pill('via_oral_ok',[{v:'si',l:'✅ Sí'},{v:'no',l:'❌ No'},{v:'dudoso',l:'⚠️ Dudoso'}],S.via_oral_ok,'')}</div><div class="fhint">Disfagia, encamamiento prolongado, deterioro cognitivo grave → NO</div></div>
+    <div class="fgrp" style="margin-top:14px"><label class="flbl">¿El paciente es candidato a posología SC (inyecciones diarias o mensuales)?</label><div class="rpills">${pill('posologia_sc_ok',[{v:'si',l:'✅ Sí'},{v:'no',l:'❌ No (no viable)'}],S.posologia_sc_ok,'')}</div><div class="fhint">Deterioro cognitivo, apoyo social limitado, destreza manual reducida, adherencia esperada baja → NO</div></div>
+    <div class="sec-lbl" style="margin-top:18px">Factores que condicionan preferencia SC/IV sobre oral (riesgo ALTO)</div>
+    <div class="cbox-list">
+      ${cboxItem('edad_75_mas','Edad ≥ 80 años (si no se ha capturado automáticamente)','→ Preferir zoledrónico IV o denosumab antes que oral [SEIOMM 2022]')}
+      ${cboxItem('polimedicado','Polimedicación (≥5 fármacos crónicos)','→ Riesgo de interacciones y baja adherencia oral; preferir SC/IV [SEIOMM 2022]')}
+      ${cboxItem('mala_adherencia','Adherencia oral previamente mala o esperada baja','→ Preferir zoledrónico IV (ciclo anual) o denosumab SC (6m) [SEIOMM 2022]')}
+    </div>
+  </div></div>`;
+}
+
+/* ── CI BLOCK (desplegable, compartido entre paso 4A y 4B) ── */
+function ciBlock(){
+  return`<div class="card"><details class="ci-details"><summary class="ci-summary"><div><span class="ci-sum-icon">⚠️</span><strong>Contraindicaciones y precauciones de fármacos</strong><div class="ci-sum-sub">Fichas técnicas · Despliega para marcar las que apliquen</div></div><span class="ci-sum-arrow">▸</span></summary><div class="card-body">
+    <div class="sec-lbl">Tolerancia digestiva (bifosfonatos orales)</div>
+    <div class="cbox-list" style="margin-bottom:16px">
+      ${cboxItem('gi_esofago','Patología esofágica grave','Estenosis, acalasia, esofagitis severa → CI bifosfonatos orales [FT 4.3]','warn')}
+      ${cboxItem('gi_ulcera','Úlcera péptica activa o gastritis severa','→ CI bifosfonatos orales durante el episodio activo','warn')}
+      ${cboxItem('gi_malabs_activa','Síndrome de malabsorción activo','Celíaca activa, bypass → absorción BP oral impredecible','warn')}
+    </div>
+    <div class="sec-lbl">Contraindicaciones para osteoformadores anabólicos (teriparatida, abaloparatida, romosozumab)</div>
+    <div class="cbox-list" style="margin-bottom:16px">
+      ${cboxItem('neo_bone_risk','Neoplasias malignas esqueléticas o metástasis óseas','→ CI teriparatida [FT 4.3], abaloparatida [FT 4.3] y romosozumab [FT 4.4]','warn')}
+      ${cboxItem('rt_esqueletica','Radioterapia externa previa sobre el esqueleto','→ CI teriparatida y abaloparatida (riesgo osteosarcoma experimental) [FT 4.3]','warn')}
+      ${cboxItem('hipercalcemia','Hipercalcemia preexistente confirmada','→ CI teriparatida [FT 4.3], abaloparatida [FT 4.3] y romosozumab (hipocalcemia/hipercalcemia) [FT Evenity 4.3]','warn')}
+      ${cboxItem('fa_muy_elev','Fosfatasa alcalina elevada sin causa aparente','→ CI teriparatida y abaloparatida [FT 4.3]. Descartar Paget.','warn')}
+      ${cboxItem('paget_hpt','Enfermedad de Paget del hueso o HPT (enf. metabólica ósea distinta a OP primaria)','→ CI específica de teriparatida [FT 4.3]','warn')}
+      ${cboxItem('insuf_renal_severa','Insuficiencia renal grave (FGe <30 mL/min o ya conocida)','→ CI todos los bisfosfonatos (orales e IV) [FT zoledrónico 4.3] + teriparatida y abaloparatida [FT 4.3]. Denosumab de elección (sin ajuste renal). Si solo introduces el FGe numérico arriba, el algoritmo ya lo detecta automáticamente.','warn')}
+      ${cboxItem('insuf_hepatica','Insuficiencia hepática grave','→ Precaución/ajuste según fármaco','warn')}
+    </div>
+    <div class="sec-lbl">Romosozumab (Evenity®) — contraindicaciones específicas FT [4.3 y 4.4]</div>
+    <div class="cbox-list" style="margin-bottom:16px">
+      ${cboxItem('iam_ictus_previo','Antecedentes de IAM o accidente cerebrovascular (en cualquier momento)','→ CONTRAINDICACIÓN ABSOLUTA de romosozumab [FT Evenity 4.3]','warn')}
+      ${cboxItem('cv_riesgo','Riesgo cardiovascular elevado (múltiples FRCV: HTA, dislipemia, DM, tabaquismo, IR, edad)','→ Precaución: valorar individualmente beneficio/riesgo con romosozumab [FT Evenity 4.4]','warn')}
+    </div>
+    <div class="sec-lbl">Abaloparatida (Eladynos®) — precauciones adicionales</div>
+    <div class="cbox-list" style="margin-bottom:16px">
+      ${cboxItem('cardiopatia_abalo','Cardiopatía significativa (insuficiencia cardiaca, arritmias, hipotensión ortostática de base)','→ Precaución: abaloparatida puede causar hipotensión ortostática y taquicardia transitoria [FT Eladynos 4.4]. Evaluar ECG y TA antes de iniciar.','warn')}
+      ${cboxItem('urolitiasis','Urolitiasis activa o reciente','→ Precaución con teriparatida y abaloparatida [FT 4.4]. Valorar hipercalciuria.','warn')}
+    </div>
+    <div class="sec-lbl">TEV</div>
+    <div class="cbox-list" style="margin-bottom:${S.sexo==='varon'?'0':'14px'}">
+      ${cboxItem('tev','Antecedente de tromboembolismo venoso (TEV)','→ SERMs y THS oral contraindicados','warn')}
+    </div>
+    ${S.sexo==='varon'?`<div class="sec-lbl" style="margin-top:14px">Varón — específico</div><div class="cbox-list">${cboxItem('deprivacion_androg','Tratamiento de deprivación androgénica (cáncer de próstata)','→ Indicación específica de denosumab')}</div>`:''}
+  </div></details></div>`;
+}
+
+/* ── RENDER STEPS ── */
+function renderProgress(){
+  $('progBox').innerHTML='<div class="prog-steps">'+['Paciente','Fractura','Derivación','Datos Clínicos','Resultado'].map((l,i)=>{const cls=i<cur?'done':i===cur?'active':'';return`<div class="prog-step ${cls}"><span class="snum">${i<cur?'✓':(i+1)}</span><span class="slbl">${l}</span></div>`}).join('')+'</div>';
+}
+function renderNav(){
+  $('navBar').innerHTML=`<button class="btn btn-sec" onclick="prevStep()" ${cur===0?'disabled':''}>← Anterior</button>${cur===4?`<button class="btn btn-navy" onclick="window.print()">🖨️ Imprimir / PDF</button>`:`<button class="btn btn-pri" onclick="nextStep()">${cur===3?'Ver resultado →':'Siguiente →'}</button>`}`;
+}
+
+function renderStep1(){
+  return`<div class="card"><div class="card-hdr"><h2>Datos del Paciente</h2></div><div class="card-body">
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">Edad *</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="18" max="110" placeholder="años" value="${nz(S.edad)}" oninput="S.edad=intES(this.value);if(S.edad>=80)S.edad_75_mas=true;"></div>
+      <div class="fgrp"><label class="flbl">Sexo *</label><div class="rpills">${pill('sexo',[{v:'mujer',l:'♀ Mujer'},{v:'varon',l:'♂ Varón'}],S.sexo,'renderCurrentStep()')}</div></div>
+    </div>
+    ${S.sexo==='mujer'?`<hr class="div"><div class="fgrp"><label class="flbl">¿Menopausia?</label><div class="rpills">${pill('menopausica',[{v:'si',l:'Sí'},{v:'no',l:'No / Premenopáusica'}],S.menopausica,'renderCurrentStep()')}</div></div>${S.menopausica==='si'?`<div class="fgrp" style="margin-top:14px"><label class="flbl">Edad de la menopausia</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="20" max="65" value="${nz(S.edad_meno)}" oninput="S.edad_meno=intES(this.value)">${menopausiaPrecoz()?`<div class="fhint" style="color:var(--orange)">⚠️ Menopausia precoz (&lt;45a) — factor de riesgo mayor</div>`:''}</div>`:''}`:''}
+  </div></div>`;
+}
+
+function renderStep2(){
+  return`<div class="card"><div class="card-hdr"><h2>Fractura</h2></div><div class="card-body">
+    <div class="fgrp"><label class="flbl">Fractura actual *</label><div class="rpills">${pill('fx_actual',[{v:'cadera',l:'🦴 Cadera'},{v:'vertebral',l:'Vertebral'},{v:'humero',l:'Húmero proximal'},{v:'radio',l:'Radio distal'},{v:'pelvis',l:'Pelvis/cotilo'},{v:'otras',l:'Otras'}],S.fx_actual,'renderCurrentStep()')}</div></div>
+    <hr class="div">
+    <div class="fgrp"><label class="flbl">¿Fractura por fragilidad previa?</label><div class="rpills">
+      <label class="rpill ${S.fx_previa==='si'?'sel':''}" onclick="S.fx_previa='si';renderCurrentStep()"><input type="radio">Sí</label>
+      <label class="rpill ${S.fx_previa==='no'?'sel':''}" onclick="S.fx_previa='no';S.fx_vert_previas=0;S.fx_cadera_previa=false;renderCurrentStep()"><input type="radio">No</label>
+    </div></div>
+    ${S.fx_previa==='si'?`<div class="frow" style="margin-top:12px"><div class="fgrp"><label class="flbl">Fracturas vertebrales previas</label><div class="rpills">${pill('fx_vert_previas',[{v:0,l:'Ninguna'},{v:1,l:'1'},{v:2,l:'≥2'}],S.fx_vert_previas,'')}</div></div><div class="fgrp"><label class="flbl">¿Fractura de cadera previa?</label><div class="rpills"><label class="rpill ${S.fx_cadera_previa?'sel':''}" onclick="S.fx_cadera_previa=true;renderCurrentStep()"><input type="radio">Sí</label><label class="rpill ${!S.fx_cadera_previa?'sel':''}" onclick="S.fx_cadera_previa=false;renderCurrentStep()"><input type="radio">No</label></div></div></div>`:''}
+    <hr class="div">
+    <div class="fgrp"><label class="flbl">Escenario clínico *</label><div class="rpills">${pill('escenario',[{v:'hospitalizado',l:'🏥 Hospitalizado (sin DMO)'},{v:'ambulatorio',l:'🚶 Ambulatorio (con DMO)'}],S.escenario,'renderCurrentStep()')}</div></div>
+  </div></div>`;
+}
+
+function renderStep3(){
+  const age90=S.edad>=90;
+  const isAmb=S.escenario==='ambulatorio';
+  const sel=S.deriv_manual;
+  // Listado de criterios (solo referencia, sin casillas)
+  const uceRef=`<details class="ref-dd"><summary>Ver criterios de derivación a UCE</summary><div class="ref-body">
+    <ul>
+      <li>Demencia o deterioro cognitivo significativo</li>
+      <li>Dependiente para las ABVD</li>
+      <li>Alta prevista a residencia sociosanitaria</li>
+      <li>Edad ≥90 años</li>
+    </ul></div></details>`;
+  const reumaRef=`<details class="ref-dd"><summary>Ver criterios de derivación a Reumatología</summary><div class="ref-body">
+    <div class="ref-grp">Paciente ya en seguimiento por Reumatología</div>
+    <ul><li>Por patología reumática (Reumatología asume también la osteoporosis)</li></ul>
+    <div class="ref-grp">A. OP secundaria — Fármacos</div>
+    <ul><li>Glucocorticoides crónicos</li><li>Anticomiciales</li><li>Antirretrovirales</li><li>Inhibidores de la aromatasa</li></ul>
+    <div class="ref-grp">A. OP secundaria — Enfermedades</div>
+    <ul><li>Artritis reumatoide · EII · Enfermedad celíaca · Malabsorción intestinal</li><li>Hipogonadismo · Anorexia/bulimia · Trasplante · HPT primario · ERC 4-5</li></ul>
+    <div class="ref-grp">B. OP complicada</div>
+    <ul><li>Fractura durante tratamiento correcto con denosumab o teriparatida (buena adherencia documentada)</li></ul>
+    <div class="ref-grp">C. Otras patologías óseas</div>
+    <ul><li>Paget · Osteomalacia · Osteogénesis imperfecta</li></ul></div></details>`;
+  // Opciones del selector
+  const opt=(val,title,sub)=>`<div class="svc-opt ${sel===val?'sel':''}" onclick="S.deriv_manual='${val}';renderCurrentStep()"><div class="svc-radio"></div><div class="svc-txt"><div class="svc-title">${title}</div><div class="svc-sub">${sub}</div></div></div>`;
+  return`<div class="card"><div class="card-hdr"><h2>Criterios de Derivación</h2><p>${isAmb?'Paciente ambulatorio: Reumatología o Rehabilitación (FLS)':'Paciente hospitalizado: UCE, Reumatología o Rehabilitación (FLS)'}</p></div><div class="card-body">
+    <div class="sec-lbl">¿Quién asume al paciente?</div>
+    ${age90&&!isAmb&&!sel?`<div class="alert alert-warn"><span class="alert-ico">⚠️</span><div>Edad ≥90 años: la UCE suele asumir al paciente. Confirma la derivación abajo.</div></div>`:''}
+    <div class="svc-opts">
+      ${!isAmb?opt('uce','🏥 UCE','La Unidad de Corta Estancia asume el tratamiento durante el ingreso'):''}
+      ${opt('reuma','🔬 Reumatología','Osteoporosis secundaria, complicada u otra patología ósea de su ámbito')}
+      ${opt('ninguno',(isAmb?'🚶':'🩺')+' Rehabilitación (FLS)','Ningún criterio de UCE ni Reumatología: continúa el algoritmo aquí')}
+    </div>
+    ${!isAmb?uceRef:`<div class="alert alert-teal" style="margin-bottom:12px"><span class="alert-ico">ℹ️</span><div>Paciente ambulatorio: la UCE no aplica.</div></div>`}
+    ${reumaRef}
+    ${sel?'':`<div class="alert alert-warn" style="margin-top:4px"><span class="alert-ico">⚠️</span><div>Selecciona quién asume al paciente para continuar.</div></div>`}
+  </div></div>`;
+}
+
+function renderStep4A(){
+  return`<div class="card"><div class="card-hdr teal"><h2>🏥 Datos del ingreso (sin DMO)</h2></div><div class="card-body">
+    <div class="sec-lbl">Analítica</div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">25-OH VitD (ng/mL)</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" max="150" placeholder="ng/mL" value="${nz(S.vitd_h)}" oninput="S.vitd_h=numES(this.value)"><div class="fhint">&lt;20 déficit · 20-30 insuf · ≥30 suficiente</div></div>
+      <div class="fgrp"><label class="flbl">PTH intacta</label><div class="rpills">${pill('pth_h',[{v:'normal',l:'Normal'},{v:'elevada',l:'Elevada'},{v:'nd',l:'No disponible'}],S.pth_h,'')}</div></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">FGe (CKD-EPI) mL/min</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" max="150" value="${nz(S.fge_h)}" oninput="S.fge_h=numES(this.value)"><div class="fhint">&lt;30 CI BP · 30-35 precaución IV · ≥35 OK</div></div>
+      ${calcioWidget('h')}
+    </div>
+  </div></div>${preguntasViaHtml()}${ciBlock()}`;
+}
+
+function renderStep4B(){
+  return`<div class="card"><div class="card-hdr"><h2>Densitometría y Analítica</h2></div><div class="card-body">
+    <div class="sec-lbl">DXA — T-scores</div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">Columna L1-L4</label><input type="text" class="num" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="-7" max="3" placeholder="-2,5" value="${nz(S.dmo_col)}" oninput="S.dmo_col=numES(this.value)"></div>
+      <div class="fgrp"><label class="flbl">Cuello femoral</label><input type="text" class="num" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="-7" max="3" placeholder="-2,0" value="${nz(S.dmo_cuello)}" oninput="S.dmo_cuello=numES(this.value)"></div>
+    </div>
+    <div class="frow"><div class="fgrp"><label class="flbl">Cadera total</label><input type="text" class="num" autocomplete="off" autocorrect="off" spellcheck="false" step="0.1" min="-7" max="3" placeholder="-2,3" value="${nz(S.dmo_cadera)}" oninput="S.dmo_cadera=numES(this.value)"></div><div></div></div>
+    <div class="fhint">Al menos un valor. Normal ≥−1,0 · Osteopenia −1,0/−2,49 · OP ≤−2,5</div>
+    <hr class="div">
+    <div class="sec-lbl">Analítica</div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">25-OH VitD (ng/mL)</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" max="150" value="${nz(S.vitd_a)}" oninput="S.vitd_a=numES(this.value)"></div>
+      <div class="fgrp"><label class="flbl">PTH intacta</label><div class="rpills">${pill('pth_a',[{v:'normal',l:'Normal'},{v:'elevada',l:'Elevada'},{v:'nd',l:'No disponible'}],S.pth_a,'')}</div></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">FGe (mL/min)</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" max="150" value="${nz(S.fge_a)}" oninput="S.fge_a=numES(this.value)"><div class="fhint">&lt;30 CI BP · 30-35 precaución IV</div></div>
+      ${calcioWidget('a')}
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">P1NP basal (ng/mL)</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" value="${nz(S.p1np)}" oninput="S.p1np=numES(this.value)"><div class="fhint">Marcador formación. Extraer antes de iniciar tto.</div></div>
+      <div class="fgrp"><label class="flbl">Beta-CTX basal (ng/mL, ayunas)</label><input type="text" class="num" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" min="0" step="0.01" value="${nz(S.ctx)}" oninput="S.ctx=numES(this.value)"><div class="fhint">Marcador resorción. Mañana, ayunas.</div></div>
+    </div>
+    <div class="frow">
+      <div class="fgrp"><label class="flbl">Fosfatasa alcalina</label><div class="rpills"><label class="rpill ${!S.fa_elev?'sel':''}" onclick="setBool('fa_elev',false,this)"><input type="radio">Normal</label><label class="rpill ${S.fa_elev?'sel':''}" onclick="setBool('fa_elev',true,this)"><input type="radio">Elevada</label></div></div>
+      <div class="fgrp"><label class="flbl">TSH</label><div class="rpills"><label class="rpill ${!S.tsh_alt?'sel':''}" onclick="setBool('tsh_alt',false,this)"><input type="radio">Normal</label><label class="rpill ${S.tsh_alt?'sel':''}" onclick="setBool('tsh_alt',true,this)"><input type="radio">Alterada</label></div></div>
+    </div>
+    <hr class="div">
+    <div class="sec-lbl">Factor de riesgo mayor para fractura</div>
+    <div class="cbox-list">
+      ${cboxItem('factor_riesgo_mayor','Glucocorticoides, inhibidores de aromatasa, hipogonadismo u otro factor de riesgo mayor','En osteopenia (T ≤ −2,0), un factor de riesgo mayor eleva la categoría a riesgo ALTO [SEIOMM 2022]')}
+    </div>
+  </div></div>${preguntasViaHtml()}${ciBlock()}`;
+}
+
+function renderStep5(){
+  const deriv=computeDerivation();
+  const svcColor={UCE:'rb-uce',REUMATOLOGIA:'rb-reu',REHABILITACION:'rb-reh'};
+  const svcIcon={UCE:'🏥',REUMATOLOGIA:'🔬',REHABILITACION:'🦺'};
+  const svcName={UCE:'UCE',REUMATOLOGIA:'Reumatología',REHABILITACION:'Rehabilitación — FLS'};
+  const today=new Date().toLocaleDateString('es-ES');
+  let risk=null,riskLabel='',riskClass='';
+  if(deriv.svc==='REHABILITACION'&&S.escenario==='ambulatorio'){
+    risk=computeRisk();
+    const rMap={'MUY_ALTO':['🔴 Muy alto riesgo','rb-ma'],'ALTO':['🟠 Alto riesgo','rb-a'],'MODERADO_SERM':['🟡 Riesgo moderado','rb-m'],'MODERADO':['🟡 Riesgo moderado','rb-m'],'BAJO':['🟢 Riesgo bajo','rb-b']};
+    if(risk&&rMap[risk])[riskLabel,riskClass]=rMap[risk];
+  }
+  let analFx='';
+  if(S.fa_elev)analFx+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div>FA elevada: descartar Paget, osteomalacia. Valorar derivación si no hecha. [SEIOMM 2022]</div></div>`;
+  if(S.tsh_alt)analFx+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div>TSH alterada: hipertiroidismo es factor de riesgo. Valorar Endocrinología. [SEIOMM 2022]</div></div>`;
+  const _cc=getCalcioCorr();
+  if(hipocalcemia())analFx+=`<div class="warn-item wi-d"><span class="warn-ico">🚨</span><div>Hipocalcemia (Ca corregido ${_cc} mg/dL): corregir ANTES de cualquier fármaco antiosteoporótico [FT todos 4.3].</div></div>`;
+  else if(_cc!==null&&_cc>10.5)analFx+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div>Calcio corregido elevado (${_cc} mg/dL): descartar hipercalcemia. Contraindica teriparatida y abaloparatida [FT 4.3]. Valorar antes de anabólicos.</div></div>`;
+  if(S.pth_a==='elevada'||S.pth_h==='elevada')analFx+=`<div class="warn-item wi-w"><span class="warn-ico">⚠️</span><div>PTH elevada: descartar HPT primario o secundario. Si HPT primario: derivar. [SEIOMM 2022]</div></div>`;
+  let p1npCtxHtml='';
+  if(S.p1np!==null||S.ctx!==null)p1npCtxHtml=`<div class="alert alert-teal"><span class="alert-ico">📊</span><div><strong>MRO basales:</strong>${S.p1np!==null?` P1NP: <strong>${S.p1np} ng/mL</strong>`:''}${S.ctx!==null?` · Beta-CTX: <strong>${S.ctx} ng/mL</strong>`:''}<br><small>Referencia para evaluar respuesta a los 3-6 meses. [Vasikaran Osteoporos Int 2011]</small></div></div>`;
+  const refs=[
+    ['1','Riancho JA et al. Guías de práctica clínica en la osteoporosis (SEIOMM, actualización 2022). <em>Rev Osteoporos Metab Miner</em> 2022;14(1):13-33.'],
+    ['2','Lyles KW et al. Zoledronic acid and fractures and mortality after hip fracture (HORIZON-PFT). <em>N Engl J Med</em> 2007;357:1799-809.'],
+    ['3','Cosman F et al. Romosozumab treatment in postmenopausal women (FRAME). <em>N Engl J Med</em> 2016;375:1532-43.'],
+    ['4','Saag KG et al. Romosozumab or alendronate for fracture prevention (ARCH). <em>N Engl J Med</em> 2017;377:1417-27.'],
+    ['5','Miller PD et al. Abaloparatide vs placebo on vertebral fractures (ACTIVE). <em>JAMA</em> 2016;316:722-33.'],
+    ['6','Neer RM et al. Parathyroid hormone and fractures and BMD (teriparatida). <em>N Engl J Med</em> 2001;344:1434-41.'],
+    ['7','Cummings SR et al. Denosumab for prevention of fractures (FREEDOM). <em>N Engl J Med</em> 2009;361:756-65.'],
+    ['8','Vasikaran S et al. Markers of bone turnover for fracture risk and monitoring. <em>Osteoporos Int</em> 2011;22:391-420.'],
+    ['9','Harris ST et al. Risedronate and vertebral and nonvertebral fractures. <em>JAMA</em> 1999;282:1344-52.'],
+    ['10','Black DM et al. Alendronate reduces fractures (FIT). <em>Lancet</em> 1996;348:1535-41.'],
+    ['11','Langdahl BL et al. Romosozumab vs teriparatide after bisphosphonate. <em>Lancet</em> 2017;390:1585-94.'],
+    ['12','Ettinger B et al. Raloxifeno and vertebral fracture (MORE). <em>JAMA</em> 1999;282:637-45.'],
+    ['13','EMA. Eladynos (abaloparatide) EPAR. EMA/747960/2022. Dic 2022.'],
+    ['14','EMA. Evenity (romosozumab) FT/EPAR. Sección 4.3: Antecedentes de IAM o ACV → CI absoluta.'],
+    ['15','AEMPS. Fichas técnicas — indicación aprobada en varón en España: denosumab, risedronato, zoledronato y teriparatida. cima.aemps.es'],
+    ['16','Ramchand SK, Leder BZ. Sequential Therapy for the Long-Term Treatment of Postmenopausal Osteoporosis. <em>J Clin Endocrinol Metab</em> 2024;109:303-11. doi:10.1210/clinem/dgad496'],
+    ['17','Cosman F, Lewiecki EM, Eastell R, Ebeling PR, Jan De Beur S, Langdahl B, et al. Goal-directed osteoporosis treatment: ASBMR/BHOF task force position statement 2024. <em>J Bone Miner Res</em> 2024;39:1393-405. doi:10.1093/jbmr/zjae119'],
+    ['18','Gregson CL, Armstrong DJ, Avgerinou C, Bowden J, Cooper C, Douglas L, et al. The 2024 UK clinical guideline for the prevention and treatment of osteoporosis. <em>Arch Osteoporos</em> 2025;20:119. doi:10.1007/s11657-025-01588-3'],
+    ['19','Eastell R, Rosen CJ, Black DM, Cheung AM, Murad MH, Shoback D. Pharmacological Management of Osteoporosis in Postmenopausal Women: An Endocrine Society Clinical Practice Guideline. <em>J Clin Endocrinol Metab</em> 2019;104:1595-622. doi:10.1210/jc.2019-00221'],
+    ['20','Cosman F, Nieves JW, Dempster DW. Treatment Sequence Matters: Anabolic and Antiresorptive Therapy for Osteoporosis. <em>J Bone Miner Res</em> 2017;32:198-202. doi:10.1002/jbmr.3051'],
+    ['21','Koski AM, Löyttyniemi E, Väänänen H, Laine H, Niskanen L, Nevalainen PI, et al. The effectiveness of teriparatide in the clinical practice—attenuation of the bone mineral density outcome by increasing age and bisphosphonate pretreatment. <em>Ann Med</em> 2013;45:230-5. doi:10.3109/07853890.2012.742560'],
+    ['22','Nakamura T, Fukunaga M, Nakano T, Kishimoto H, Ito M, Hagino H, et al. Efficacy and safety of once-yearly zoledronic acid in Japanese patients with primary osteoporosis (ZONE study). <em>Osteoporos Int</em> 2017;28:389-98. doi:10.1007/s00198-016-3736-y'],
+    ['23','Wang H, Liu H, Huang J, Meng X, Wang W, Xiao W, et al. Comparative Effects of Minodronate and Alendronate on Low Back Pain in Postmenopausal Osteoporosis and Age Influence: A Head-to-Head, Randomized Clinical Trial. <em>Clin Interv Aging</em> 2025;20:2219-30. doi:10.2147/CIA.S541940'],
+    ['24','Bertoldo F, Cianferotti L, Di Monaco M, Falchetti A, Fassio A, Gatti D, et al. Definition, Assessment, and Management of Vitamin D Inadequacy: Suggestions, Recommendations, and Warnings from the SIOMMMS. <em>Nutrients</em> 2022;14:4148. doi:10.3390/nu14194148'],
+    ['25','Matsumoto T, Sone T, Soen S, Tanaka S, Yamashita A, Inoue T. Abaloparatide Increases Lumbar Spine and Hip BMD in Japanese Patients With Osteoporosis: The Phase 3 ACTIVE-J Study. <em>J Clin Endocrinol Metab</em> 2022;107:e4222-31. doi:10.1210/clinem/dgac486'],
+    ['26','Lewiecki EM, Dinavahi RV, Lazaretti-Castro M, Ebeling PR, Adachi JD, Miyauchi A, et al. One Year of Romosozumab Followed by Two Years of Denosumab Maintains Fracture Risk Reductions: FRAME Extension Study. <em>J Bone Miner Res</em> 2019;34:419-28. doi:10.1002/jbmr.3622'],
+    ['27','Dawson-Hughes B, Chen P, Krege JH. Response to teriparatide in patients with baseline 25-hydroxyvitamin D insufficiency or sufficiency. <em>J Clin Endocrinol Metab</em> 2007;92:4630-6. doi:10.1210/jc.2007-0239'],
+  ];
+  return`<div class="card" style="margin-bottom:0"><div style="background:var(--navy);padding:16px 22px;border-radius:var(--r) var(--r) 0 0;color:#fff;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+    <div><div style="font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700">Informe Clínico — FLS Osteoporosis</div><div style="font-size:12px;opacity:.65;margin-top:2px">${S.edad?`${S.edad}a · `:''}${S.sexo==='mujer'?'Mujer':S.sexo==='varon'?'Varón':''}${S.menopausica==='si'?' · Posmenopáusica':''} · Fx: ${S.fx_actual||'—'} · ${today}</div></div>
+    <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap"><span class="rbadge ${svcColor[deriv.svc]}">${svcIcon[deriv.svc]} ${svcName[deriv.svc]}</span>${risk?`<span class="rbadge ${riskClass}">${riskLabel}</span>`:''}</div>
+  </div><div style="background:var(--g50);border-bottom:1px solid var(--g200);padding:8px 22px"><span style="font-size:12px;color:var(--g500)">⚠️ Apoyo a la decisión clínica — SEIOMM 2022 + Fichas Técnicas AEMPS/EMA. No sustituye el juicio del facultativo.</span></div></div>
+  <div class="card"><div class="card-body pt0" style="padding-top:18px"><div class="res-sec">1. Derivación</div>
+    <div class="rbadge ${svcColor[deriv.svc]}" style="margin-bottom:10px">${svcIcon[deriv.svc]} ${svcName[deriv.svc]}</div>
+    ${deriv.reasons.length>0?`<div style="margin-top:8px">${deriv.reasons.map(r=>`<div style="font-size:13px;padding:2px 0">• ${r}</div>`).join('')}</div>`:''}
+    ${deriv.svc==='REHABILITACION'?`<div class="alert alert-ok" style="margin-top:10px"><span class="alert-ico">✅</span><div>Sin criterios de derivación. Tratamiento bajo FLS/Rehabilitación.</div></div>`:''}
+  </div></div>
+  ${analFx?`<div class="card"><div class="card-body pt0" style="padding-top:18px"><div class="res-sec">⚠️ Hallazgos analíticos a valorar</div>${analFx}</div></div>`:''}
+  <div class="card"><div class="card-body pt0" style="padding-top:18px"><div class="res-sec">2. Vitamina D y Calcio</div>
+    ${vitdHtml()||'<div class="alert alert-info"><span class="alert-ico">ℹ️</span><div>Sin datos de VitD. Determinar 25-OH VitD antes de iniciar tratamiento.</div></div>'}
+    ${p1npCtxHtml}
+  </div></div>
+  ${deriv.svc==='REHABILITACION'?`<div class="card"><div class="card-body pt0" style="padding-top:18px">
+    ${S.sexo==='varon'?`<div class="alert alert-info" style="margin-bottom:12px"><span class="alert-ico">♂</span><div>Fármacos con indicación aprobada en varón en España (AEMPS): <strong>denosumab, risedronato, zoledronato y teriparatida</strong>. El resto (alendronato, romosozumab, abaloparatida, SERMs, ibandronato) sería uso off-label.</div></div>`:''}
+    ${S.escenario==='hospitalizado'?`<div class="res-sec">3. Estrategia Terapéutica sin DMO</div>${hospRecHtml()}`:`
+      <div class="res-sec">3. Nivel de Riesgo</div>
+      ${risk?`<div style="margin-bottom:12px"><span class="rbadge ${riskClass}">${riskLabel}</span><div style="font-size:12px;color:var(--g500);margin-top:5px">${S.dmo_col!==null?`T col: ${S.dmo_col} · `:''}${S.dmo_cuello!==null?`T cuello: ${S.dmo_cuello} · `:''}${S.dmo_cadera!==null?`T cadera: ${S.dmo_cadera}`:''}</div></div>`:'<div class="alert alert-warn"><span>⚠️</span><div>Datos insuficientes. Verificar T-scores.</div></div>'}
+      <hr class="div"><div class="res-sec">4. Tratamiento Recomendado</div>${risk?treatmentHtml(risk):''}
+    `}
+    ${S.escenario==='ambulatorio'&&risk&&risk!=='BAJO'?`<hr class="div"><div class="res-sec">5. Terapia Secuencial</div>${sequentialHtml(risk)}`:''}
+  </div></div>
+  <div class="card"><div class="card-body pt0" style="padding-top:18px"><div class="res-sec">6. Plan de Seguimiento</div>${followupHtml(risk||'ALTO')}</div></div>`:''}
+  <div class="card"><div class="card-body pt0" style="padding-top:18px"><div class="res-sec">Referencias y Fichas Técnicas</div>
+    <details><summary>📚 Ver referencias (${refs.length})</summary><div class="ref-body">${refs.map(r=>`<div class="ref-item"><span class="ref-n">[${r[0]}]</span>${r[1]}</div>`).join('')}</div></details>
+  </div></div>
+  <div class="btn-print-row" style="text-align:right;padding:4px 0"><button class="btn btn-navy" onclick="window.print()">🖨️ Imprimir / PDF</button></div>`;
+}
+
+function renderCurrentStep(){
+  renderProgress();
+  $('stepContent').innerHTML=[renderStep1,renderStep2,renderStep3,()=>S.escenario==='hospitalizado'?renderStep4A():renderStep4B(),renderStep5][cur]();
+  renderNav();scrollTop0();
+}
+function validate(){
+  if(cur===0){if(!S.edad||S.edad<10)return alert('Edad válida requerida.')||false;if(!S.sexo)return alert('Selecciona el sexo.')||false;return true;}
+  if(cur===1){if(!S.fx_actual)return alert('Selecciona tipo de fractura.')||false;if(!S.escenario)return alert('Selecciona el escenario.')||false;return true;}
+  if(cur===2){if(!S.deriv_manual)return alert('Selecciona quién asume al paciente (UCE, Reumatología o Rehabilitación).')||false;return true;}
+  if(cur===3&&S.escenario==='ambulatorio'){
+    const hasDXA=[S.dmo_col,S.dmo_cuello,S.dmo_cadera].some(v=>v!==null&&v!==''&&!isNaN(v));
+    const prevVert=parseInt(S.fx_vert_previas)||0;
+    const totalVert=prevVert+(S.fx_actual==='vertebral'?1:0);
+    // Si ya cumple criterio clínico de muy alto riesgo (≥2 fx vertebrales), no exigir DXA
+    if(!hasDXA&&totalVert<2)return alert('Introduce al menos un T-score de densitometría, o marca las fracturas previas si el paciente ya cumple criterio clínico de riesgo.')||false;
+    return true;
+  }
+  return true;
+}
+function nextStep(){if(validate()&&cur<4){cur++;renderCurrentStep();}}
+function prevStep(){if(cur>0){cur--;renderCurrentStep();}}
+renderCurrentStep();
+</script>
+</body>
+</html>
