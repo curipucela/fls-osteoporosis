@@ -1,6 +1,6 @@
 # Algoritmo FLS — Osteoporosis
 
-Herramienta web de apoyo a la decisión clínica para el **Fracture Liaison Service (FLS)** del Servicio de Medicina Física y Rehabilitación del Hospital Universitario Doctor Peset (Valencia).
+Herramienta web de apoyo a la decisión clínica para el manejo de la osteoporosis en el contexto de un **Fracture Liaison Service (FLS)**.
 
 Basada en las guías SEIOMM 2022 y en las fichas técnicas de la AEMPS/EMA.
 
