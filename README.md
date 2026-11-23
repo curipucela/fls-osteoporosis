@@ -14,3 +14,8 @@ La aplicación no guarda ni envía datos: todo se procesa en el propio dispositi
 
 ## Aviso
 Herramienta de apoyo a la decisión clínica. No sustituye el juicio del facultativo.
+
+## Créditos y componentes de terceros
+- **Fuentes:** DM Sans (© 2014 The DM Sans Project Authors) y Libre Baskerville (© 2012 The Libre Baskerville Project Authors), bajo licencia SIL Open Font License 1.1. Ver [OFL.txt](OFL.txt).
+- **Contenido clínico:** basado en las guías SEIOMM 2022 y en las fichas técnicas de la AEMPS/EMA, citadas en la aplicación. La aplicación no está afiliada ni avalada por estas entidades.
+- **Marcas:** los nombres comerciales de medicamentos mencionados son marcas registradas de sus respectivos titulares.
